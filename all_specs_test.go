@@ -9,6 +9,7 @@ import (
 func TestAllSpecs(t *testing.T) {
   r := gospec.NewRunner()
   r.AddSpec(ZBoxSpec)
+  r.AddSpec(ZBoxReverseSpec)
   gospec.MainGoTest(r, t)
 }
 

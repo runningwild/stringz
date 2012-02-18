@@ -18,6 +18,16 @@ func idiotZboxer(p string) []int {
   return zs
 }
 
+func idiotZboxerReversed(p string) []int {
+  zs := make([]int, len(p))
+  for i := len(zs) - 1; i >= 0; i-- {
+    for i - zs[i] >= 0 && p[i - zs[i]] == p[len(p) - zs[i] - 1] {
+      zs[i]++
+    }
+  }
+  return zs
+}
+
 // Returns a string of length n of all the same character
 func makeTestString1(n int) string {
   b := make([]byte, n)
@@ -125,7 +135,33 @@ func BenchmarkZBox4_1M(b *testing.B) {
   }
 }
 
+func augment(b []byte, radix int) bool {
+  for i := range b {
+  if int(b[i]) < radix - 1 {
+    b[i]++
+      return true
+    } else {
+      b[i] = 0
+    }
+  }
+  return false
+}
+
 func ZBoxSpec(c gospec.Context) {
+  c.Specify("Comprehensive test 3^9", func() {
+    b := make([]byte, 9)
+    for augment(b, 3) {
+      p := string(b)
+      c.Expect(stringz.PrecalcZboxes(p), ContainsExactly, idiotZboxer(p))
+    }
+  })
+  c.Specify("Comprehensive test 2^15", func() {
+    b := make([]byte, 15)
+    for augment(b, 2) {
+      p := string(b)
+      c.Expect(stringz.PrecalcZboxes(p), ContainsExactly, idiotZboxer(p))
+    }
+  })
   c.Specify("Basic test.", func() {
     p := ""
     c.Expect(stringz.PrecalcZboxes(p), ContainsExactly, idiotZboxer(p))
@@ -159,5 +195,13 @@ func ZBoxSpec(c gospec.Context) {
     c.Expect(stringz.PrecalcZboxes(p), ContainsExactly, idiotZboxer(p))
     p = "bbbbbbbaaaaaaaaabbbbbbbbbbbbbbaaaabbbbbbbbbaaaaabbaaaaaaaaabbaa"
     c.Expect(stringz.PrecalcZboxes(p), ContainsExactly, idiotZboxer(p))
+    p = "aabbaaa"
+    c.Expect(stringz.PrecalcZboxes(p), ContainsExactly, idiotZboxer(p))
+  })
+}
+
+
+func ZBoxReverseSpec(c gospec.Context) {
+  c.Specify("Basic test.", func() {
   })
 }

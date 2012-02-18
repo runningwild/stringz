@@ -43,8 +43,10 @@ func PrecalcZboxes(p string) []int {
         // we need to find how far that is, but we don't need to start
         // comparing until the end of this prefix.
         pos := right + 1
-        for pos < len(p) && p[pos] == p[j + (pos - i) - 1] {
+        cmp := pos - i
+        for pos < len(p) && p[pos] == p[cmp] {
           pos++
+          cmp++
         }
         left = i
         right = pos - 1
@@ -55,13 +57,12 @@ func PrecalcZboxes(p string) []int {
   return zs
 }
 
-func precalcZboxesReversed(p string) []int {
+func PrecalcZboxesReversed(p string) []int {
   n := len(p)
   if n == 0 { return nil }
   if n == 1 { return []int{ n } }
   pos := n - 2
   for pos >= 0 && p[pos] == p[pos + 1] {
-    fmt.Printf("cmp: %c %c\n", p[pos], p[pos+1])
     pos--
   }
 
@@ -76,7 +77,7 @@ func precalcZboxesReversed(p string) []int {
     fmt.Printf("i: %d\n", i)
     fmt.Printf("left/right: %d/%d\n", left, right)
     if left > i {
-      fmt.Printf("left\n")
+      fmt.Printf("exit\n")
       // We just left a zbox - so we need to see how much of a suffix we have
       // from this position
       pos := i
@@ -84,13 +85,14 @@ func precalcZboxesReversed(p string) []int {
         pos--
       }
       zs[i] = i - pos
-      left = pos
+      left = pos + 1
       right = i
     } else {
       fmt.Printf("else\n")
-      j := n - (right - i) - 1
-      rem := i - left
-      zj := zs[j]
+      j := right - i
+      rem := i - left + 1
+      zj := zs[n - j - 1]
+      fmt.Printf("j/rem/zj: %d/%d/%d\n", j, rem, zj)
       if zj < rem {
       fmt.Printf("else2\n")
         // The old z-value shows us that we have a prefix here that is less
@@ -103,13 +105,15 @@ func precalcZboxesReversed(p string) []int {
         // we need to find how far that is, but we don't need to start
         // comparing until the end of this prefix.
         pos := left - 1
-        fmt.Printf("%d %d %d\n", left, right, pos)
-        for pos >= 0 && p[pos] == p[n - right + pos] {
+        // fmt.Printf("%d %d %d\n", left, right, pos)
+        // for pos < len(p) && p[pos] == p[j + (pos - i) - 1] {
+        for pos >= 0 && p[pos] == p[(n - j) - (i - pos)] {
           pos--
         }
-        zs[i] = i - pos
-        left = pos
+        left = pos + 1
         right = i
+        zs[i] = right - left + 1
+        fmt.Printf("after3: %d %d\n", left, right)
       }
     }
   }
