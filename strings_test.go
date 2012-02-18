@@ -202,6 +202,54 @@ func ZBoxSpec(c gospec.Context) {
 
 
 func ZBoxReverseSpec(c gospec.Context) {
+  c.Specify("Comprehensive test 3^9", func() {
+    b := make([]byte, 9)
+    for augment(b, 3) {
+      p := string(b)
+      c.Expect(stringz.PrecalcZboxesReversed(p), ContainsExactly, idiotZboxerReversed(p))
+    }
+  })
+  c.Specify("Comprehensive test 2^15", func() {
+    b := make([]byte, 15)
+    for augment(b, 2) {
+      p := string(b)
+      c.Expect(stringz.PrecalcZboxesReversed(p), ContainsExactly, idiotZboxerReversed(p))
+    }
+  })
   c.Specify("Basic test.", func() {
+    p := ""
+    c.Expect(stringz.PrecalcZboxesReversed(p), ContainsExactly, idiotZboxerReversed(p))
+    p = "a"
+    c.Expect(stringz.PrecalcZboxesReversed(p), ContainsExactly, idiotZboxerReversed(p))
+    p = "abcabc"
+    c.Expect(stringz.PrecalcZboxesReversed(p), ContainsExactly, idiotZboxerReversed(p))
+    p = "aabcabc"
+    c.Expect(stringz.PrecalcZboxesReversed(p), ContainsExactly, idiotZboxerReversed(p))
+    p = "aaabcabc"
+    c.Expect(stringz.PrecalcZboxesReversed(p), ContainsExactly, idiotZboxerReversed(p))
+    p = "aabcaabc"
+    c.Expect(stringz.PrecalcZboxesReversed(p), ContainsExactly, idiotZboxerReversed(p))
+    p = "aabcaaabc"
+    c.Expect(stringz.PrecalcZboxesReversed(p), ContainsExactly, idiotZboxerReversed(p))
+    p = "aabcaaaabc"
+    c.Expect(stringz.PrecalcZboxesReversed(p), ContainsExactly, idiotZboxerReversed(p))
+    p = "aabcaaaabc*aabcaaaabc"
+    c.Expect(stringz.PrecalcZboxesReversed(p), ContainsExactly, idiotZboxerReversed(p))
+    p = "aabcaaaabc*aabcaaaabc*aabcaaaabc*aabcaaaabc*aabcaaaabc"
+    c.Expect(stringz.PrecalcZboxesReversed(p), ContainsExactly, idiotZboxerReversed(p))
+    p = "abcdefghijklmnopq"
+    c.Expect(stringz.PrecalcZboxesReversed(p), ContainsExactly, idiotZboxerReversed(p))
+    p = "abcdefghijklmnopqabcdefghijklmnopqabcdefghijklmnopq"
+    c.Expect(stringz.PrecalcZboxesReversed(p), ContainsExactly, idiotZboxerReversed(p))
+    p = "abcdefghijklmnopqabc efghijklmnopqab cdefghijklmnopq"
+    c.Expect(stringz.PrecalcZboxesReversed(p), ContainsExactly, idiotZboxerReversed(p))
+    p = "aaaaaaaaaaaaaaaaaa"
+    c.Expect(stringz.PrecalcZboxesReversed(p), ContainsExactly, idiotZboxerReversed(p))
+    p = "bbbbbbbbbbbaaaaaaaaaaaa"
+    c.Expect(stringz.PrecalcZboxesReversed(p), ContainsExactly, idiotZboxerReversed(p))
+    p = "bbbbbbbaaaaaaaaabbbbbbbbbbbbbbaaaabbbbbbbbbaaaaabbaaaaaaaaabbaa"
+    c.Expect(stringz.PrecalcZboxesReversed(p), ContainsExactly, idiotZboxerReversed(p))
+    p = "aabbaaa"
+    c.Expect(stringz.PrecalcZboxesReversed(p), ContainsExactly, idiotZboxerReversed(p))
   })
 }

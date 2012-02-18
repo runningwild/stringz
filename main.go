@@ -1,9 +1,5 @@
 package stringz
 
-import (
-  "fmt"
-)
-
 func PrecalcZboxes(p string) []int {
   if len(p) == 0 { return nil }
   if len(p) == 1 { return []int{ len(p) } }
@@ -72,12 +68,8 @@ func PrecalcZboxesReversed(p string) []int {
 
   left := pos + 1
   right := n - 2
-  fmt.Printf("l/r: %d/%d\n", left, right)
   for i := n - 3; i >= 0; i-- {
-    fmt.Printf("i: %d\n", i)
-    fmt.Printf("left/right: %d/%d\n", left, right)
     if left > i {
-      fmt.Printf("exit\n")
       // We just left a zbox - so we need to see how much of a suffix we have
       // from this position
       pos := i
@@ -88,32 +80,27 @@ func PrecalcZboxesReversed(p string) []int {
       left = pos + 1
       right = i
     } else {
-      fmt.Printf("else\n")
       j := right - i
       rem := i - left + 1
       zj := zs[n - j - 1]
-      fmt.Printf("j/rem/zj: %d/%d/%d\n", j, rem, zj)
       if zj < rem {
-      fmt.Printf("else2\n")
         // The old z-value shows us that we have a prefix here that is less
         // than the length remaining in out current z-box, so we use that
         // z-value and we're done.
         zs[i] = zj
       } else {
-      fmt.Printf("else3\n")
         // We are at a prefix now that goes outside of the current z-box, so
         // we need to find how far that is, but we don't need to start
         // comparing until the end of this prefix.
         pos := left - 1
-        // fmt.Printf("%d %d %d\n", left, right, pos)
-        // for pos < len(p) && p[pos] == p[j + (pos - i) - 1] {
-        for pos >= 0 && p[pos] == p[(n - j) - (i - pos)] {
+        cmp := n - (i - pos) - 1
+        for pos >= 0 && p[pos] == p[cmp] {
           pos--
+          cmp--
         }
         left = pos + 1
         right = i
         zs[i] = right - left + 1
-        fmt.Printf("after3: %d %d\n", left, right)
       }
     }
   }
