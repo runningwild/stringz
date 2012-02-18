@@ -1,6 +1,7 @@
 package stringz_test
 
 import (
+  // "fmt"
   . "github.com/orfjackal/gospec/src/gospec"
   "github.com/orfjackal/gospec/src/gospec"
   "runningwild/strings"
@@ -53,12 +54,12 @@ func makeTestString3(n int) string {
   return string(b)
 }
 
-// Returns a string of length n consisting of random characters
-func makeTestString4(n int) string {
+// Returns a string of length n consisting of random characters less than r
+func makeTestString4(n,r int) string {
   rand.Seed(1234)
   b := make([]byte, n)
   for i := range b {
-    b[i] = byte(rand.Intn(256))
+    b[i] = byte(rand.Intn(256) % r)
   }
   return string(b)
 }
@@ -119,7 +120,7 @@ func BenchmarkZBox3_1M(b *testing.B) {
 
 func BenchmarkZBox4_100k(b *testing.B) {
   b.StopTimer()
-  p := makeTestString4(100000)
+  p := makeTestString4(100000, 256)
   b.StartTimer()
   for i := 0; i < b.N; i++ {
     stringz.PrecalcZboxes(p)
@@ -128,7 +129,7 @@ func BenchmarkZBox4_100k(b *testing.B) {
 
 func BenchmarkZBox4_1M(b *testing.B) {
   b.StopTimer()
-  p := makeTestString4(1000000)
+  p := makeTestString4(1000000, 256)
   b.StartTimer()
   for i := 0; i < b.N; i++ {
     stringz.PrecalcZboxes(p)
@@ -200,7 +201,6 @@ func ZBoxSpec(c gospec.Context) {
   })
 }
 
-
 func ZBoxReverseSpec(c gospec.Context) {
   c.Specify("Comprehensive test 3^9", func() {
     b := make([]byte, 9)
@@ -252,4 +252,60 @@ func ZBoxReverseSpec(c gospec.Context) {
     p = "aabbaaa"
     c.Expect(stringz.PrecalcZboxesReversed(p), ContainsExactly, idiotZboxerReversed(p))
   })
+}
+
+func idiotStringSearch(p,t string) []int {
+  var matches []int
+  for i := 0; i < len(t) - len(p) + 1; i++ {
+    good := true
+    for j := 0; j < len(p) && j + i < len(t); j++ {
+      if p[j] != t[i] {
+        good = false
+        break
+      }
+    }
+    if good {
+      matches = append(matches, i)
+    }
+  }
+  return matches
+}
+
+func BenchmarkBoyerMoore_10_100000(b *testing.B) {
+  b.StopTimer()
+  p := makeTestString1(10)
+  t := makeTestString1(100000)
+  b.StartTimer()
+  for i := 0; i < b.N; i++ {
+    stringz.BoyerMoore(p, t)
+  }
+}
+
+func BenchmarkBoyerMoore_100_100000(b *testing.B) {
+  b.StopTimer()
+  p := makeTestString1(100)
+  t := makeTestString1(100000)
+  b.StartTimer()
+  for i := 0; i < b.N; i++ {
+    stringz.BoyerMoore(p, t)
+  }
+}
+
+func BoyerMooreSpec(c gospec.Context) {
+  c.Specify("Comprehensive test 3^9", func() {
+    // p := "cabdabdab"
+    // L,l := stringz.BoyerMooreStrongGoodSuffixRule(p)
+    // fmt.Printf("%s\n%v\n", p, L)
+    // fmt.Printf("%v\n", l)
+    p := makeTestString4(5, 5)
+    t := makeTestString4(5, 500)
+    c.Expect(stringz.BoyerMoore(p, t), ContainsExactly, idiotStringSearch(p, t))
+    p = makeTestString4(4, 5)
+    t = makeTestString4(5, 500)
+    c.Expect(stringz.BoyerMoore(p, t), ContainsExactly, idiotStringSearch(p, t))
+    p = makeTestString4(4, 15)
+    t = makeTestString4(5, 500)
+    c.Expect(stringz.BoyerMoore(p, t), ContainsExactly, idiotStringSearch(p, t))
+  })
+
 }

@@ -1,5 +1,7 @@
 package stringz
 
+// import "fmt"
+
 func PrecalcZboxes(p string) []int {
   if len(p) == 0 { return nil }
   if len(p) == 1 { return []int{ len(p) } }
@@ -118,13 +120,86 @@ func boyerMooreExtendedBadCharacterRule(p string) map[byte][]int {
   return m
 }
 
-func boyerMooreStrongGoodSuffixRule(p string) []int {
-  L := make([]int, len(p))
-  for i := range L {
-    j := len(L) - L[i] - 1
-    L[j] = i
+// L here is not exactly as specified in Gusfield, since the value used when
+// determining shifts is always n - L'(i) we just do that math now rather than
+// later.
+func BoyerMooreStrongGoodSuffixRule(p string) (L,l []int) {
+  Z := PrecalcZboxesReversed(p)
+  L = make([]int, len(p))
+  for i := 0; i < len(Z) - 1; i++ {
+    if Z[i] == 0 { continue }
+    L[len(p) - Z[i] - 1] = Z[i]
   }
-  return L
+
+  l = PrecalcZboxes(p)
+  for i := len(l) - 2; i >= 0; i-- {
+    if l[i+1] > l[i] {
+      l[i] = l[i+1]
+    }
+  }
+  for i := 0; i < len(l) - 1; i++ {
+    l[i] = len(p) - l[i+1]
+  }
+  l[len(l) - 1] = 0
+  return
+}
+
+func BoyerMoore(p,t string) []int {
+  var matches []int
+  L,l := BoyerMooreStrongGoodSuffixRule(p)
+  // R := boyerMooreExtendedBadCharacterRule(p)
+  k := len(p) - 1
+  // fmt.Printf("%v\n%v\n", L, l)
+
+  // In some cases we don't need to go all the way to the left-most character
+  // since we might know that a certain prefix of the current alignment
+  // matches based on a previous test.
+  min := 0
+  for k < len(t) {
+    i := len(p) - 1
+    h := k
+    // fmt.Printf("State: %d %d %d\n", i, h, k)
+    for i >= min && p[i] == t[h] {
+      i--
+      h--
+    }
+
+    if i < min {
+      // found a match
+      matches = append(matches, k - len(p) + 1)
+      k += l[0]
+      min = len(p) - l[0]
+      // i = len(p) - 1
+      // h = k
+    } else {
+      shift := L[i]
+      if shift == 0 {
+        // shift = l[i]
+      }
+      // println("Mismatch at ", i, ",", h, ",", k, " shift L=", L[i], "/", l[i])
+      // r := i
+      // for _,v := range R[t[h]] {
+      //   if v < i {
+      //     r = i - v
+      //     break
+      //   }
+      // }
+      // if r > shift {
+      //   shift = r
+      // }
+      if shift == 0 {
+        shift = 1
+        // i = len(p) - 1
+        // h = k
+      }
+      k += shift
+      // h += shift
+      // fmt.Printf("Shift %d -> %d\n", i, i + shift)
+      // i += shift
+      min = 0
+    }
+  }
+  return matches
 }
 
 func revString(s string) string {
