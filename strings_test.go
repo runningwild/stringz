@@ -4,6 +4,8 @@ import (
   . "github.com/orfjackal/gospec/src/gospec"
   "github.com/orfjackal/gospec/src/gospec"
   "runningwild/strings"
+  "testing"
+  "math/rand"
 )
 
 func idiotZboxer(p string) []int {
@@ -14,6 +16,113 @@ func idiotZboxer(p string) []int {
     }
   }
   return zs
+}
+
+// Returns a string of length n of all the same character
+func makeTestString1(n int) string {
+  b := make([]byte, n)
+  return string(b)
+}
+
+// Returns a string of length n, first half one character, second half a
+// different character
+func makeTestString2(n int) string {
+  b := make([]byte, n)
+  for i := n/2; i < n; i++ {
+    b[i] = 1
+  }
+  return string(b)
+}
+
+// Returns a string of length n, cycling through the number 0-255
+func makeTestString3(n int) string {
+  b := make([]byte, n)
+  for i := range b {
+    b[i] = byte(i % 256)
+  }
+  return string(b)
+}
+
+// Returns a string of length n consisting of random characters
+func makeTestString4(n int) string {
+  rand.Seed(1234)
+  b := make([]byte, n)
+  for i := range b {
+    b[i] = byte(rand.Intn(256))
+  }
+  return string(b)
+}
+
+func BenchmarkZBox1_100k(b *testing.B) {
+  b.StopTimer()
+  p := makeTestString1(100000)
+  b.StartTimer()
+  for i := 0; i < b.N; i++ {
+    stringz.PrecalcZboxes(p)
+  }
+}
+
+func BenchmarkZBox1_1M(b *testing.B) {
+  b.StopTimer()
+  p := makeTestString1(1000000)
+  b.StartTimer()
+  for i := 0; i < b.N; i++ {
+    stringz.PrecalcZboxes(p)
+  }
+}
+
+func BenchmarkZBox2_100k(b *testing.B) {
+  b.StopTimer()
+  p := makeTestString2(100000)
+  b.StartTimer()
+  for i := 0; i < b.N; i++ {
+    stringz.PrecalcZboxes(p)
+  }
+}
+
+func BenchmarkZBox2_1M(b *testing.B) {
+  b.StopTimer()
+  p := makeTestString2(1000000)
+  b.StartTimer()
+  for i := 0; i < b.N; i++ {
+    stringz.PrecalcZboxes(p)
+  }
+}
+
+func BenchmarkZBox3_100k(b *testing.B) {
+  b.StopTimer()
+  p := makeTestString3(100000)
+  b.StartTimer()
+  for i := 0; i < b.N; i++ {
+    stringz.PrecalcZboxes(p)
+  }
+}
+
+func BenchmarkZBox3_1M(b *testing.B) {
+  b.StopTimer()
+  p := makeTestString3(1000000)
+  b.StartTimer()
+  for i := 0; i < b.N; i++ {
+    stringz.PrecalcZboxes(p)
+  }
+}
+
+func BenchmarkZBox4_100k(b *testing.B) {
+  b.StopTimer()
+  p := makeTestString4(100000)
+  b.StartTimer()
+  for i := 0; i < b.N; i++ {
+    stringz.PrecalcZboxes(p)
+  }
+}
+
+func BenchmarkZBox4_1M(b *testing.B) {
+  b.StopTimer()
+  p := makeTestString4(1000000)
+  b.StartTimer()
+  for i := 0; i < b.N; i++ {
+    stringz.PrecalcZboxes(p)
+  }
 }
 
 func ZBoxSpec(c gospec.Context) {
