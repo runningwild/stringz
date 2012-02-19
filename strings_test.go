@@ -1,7 +1,7 @@
 package stringz_test
 
 import (
-  // "fmt"
+  "fmt"
   . "github.com/orfjackal/gospec/src/gospec"
   "github.com/orfjackal/gospec/src/gospec"
   "runningwild/strings"
@@ -54,9 +54,10 @@ func makeTestString3(n int) string {
   return string(b)
 }
 
-// Returns a string of length n consisting of random characters less than r
-func makeTestString4(n,r int) string {
-  rand.Seed(1234)
+// Returns a string of length n consisting of random characters less than r,
+// and using seed s
+func makeTestString4(n,r,s int) string {
+  rand.Seed(int64(s))
   b := make([]byte, n)
   for i := range b {
     b[i] = byte(rand.Intn(256) % r)
@@ -120,7 +121,7 @@ func BenchmarkZBox3_1M(b *testing.B) {
 
 func BenchmarkZBox4_100k(b *testing.B) {
   b.StopTimer()
-  p := makeTestString4(100000, 256)
+  p := makeTestString4(100000, 256, 1)
   b.StartTimer()
   for i := 0; i < b.N; i++ {
     stringz.PrecalcZboxes(p)
@@ -129,7 +130,7 @@ func BenchmarkZBox4_100k(b *testing.B) {
 
 func BenchmarkZBox4_1M(b *testing.B) {
   b.StopTimer()
-  p := makeTestString4(1000000, 256)
+  p := makeTestString4(1000000, 256, 1)
   b.StartTimer()
   for i := 0; i < b.N; i++ {
     stringz.PrecalcZboxes(p)
@@ -259,7 +260,7 @@ func idiotStringSearch(p,t string) []int {
   for i := 0; i < len(t) - len(p) + 1; i++ {
     good := true
     for j := 0; j < len(p) && j + i < len(t); j++ {
-      if p[j] != t[i] {
+      if p[j] != t[i+j] {
         good = false
         break
       }
@@ -291,21 +292,118 @@ func BenchmarkBoyerMoore_100_100000(b *testing.B) {
   }
 }
 
-func BoyerMooreSpec(c gospec.Context) {
+func same(a,b []int) bool {
+  if len(a) != len(b) { return false }
+  for i := range a {
+    if a[i] != b[i] { return false }
+  }
+  return true
+}
+
+func dstr(b []byte) string {
+  b2 := make([]byte, len(b))
+  for i := range b2 {
+    b2[i] += 'a'
+  }
+  return string(b2)
+}
+
+func idiotLongestSuffixAsPrefix(p string) []int {
+  v := make([]int, len(p))
+  for i := range p {
+    for j := i; j < len(p); j++ {
+      s := p[j:]
+      if s == p[0:len(s)] {
+        v[i] = len(s)
+        break
+      }
+    }
+  }
+  return v
+}
+func LongestSuffixAsPrefixSpec(c gospec.Context) {
+  fmt.Printf("")
+  c.Specify("Comprehensive test 2^15", func() {
+    b := make([]byte, 15)
+    for augment(b, 2) {
+      p := string(b)
+      c.Expect(stringz.LongestSuffixAsPrefix(p), ContainsExactly, idiotLongestSuffixAsPrefix(p))
+    }
+  })
   c.Specify("Comprehensive test 3^9", func() {
-    // p := "cabdabdab"
-    // L,l := stringz.BoyerMooreStrongGoodSuffixRule(p)
-    // fmt.Printf("%s\n%v\n", p, L)
-    // fmt.Printf("%v\n", l)
-    p := makeTestString4(5, 5)
-    t := makeTestString4(5, 500)
-    c.Expect(stringz.BoyerMoore(p, t), ContainsExactly, idiotStringSearch(p, t))
-    p = makeTestString4(4, 5)
-    t = makeTestString4(5, 500)
-    c.Expect(stringz.BoyerMoore(p, t), ContainsExactly, idiotStringSearch(p, t))
-    p = makeTestString4(4, 15)
-    t = makeTestString4(5, 500)
-    c.Expect(stringz.BoyerMoore(p, t), ContainsExactly, idiotStringSearch(p, t))
+    b := make([]byte, 9)
+    for augment(b, 3) {
+      p := string(b)
+      c.Expect(stringz.LongestSuffixAsPrefix(p), ContainsExactly, idiotLongestSuffixAsPrefix(p))
+    }
+  })
+  c.Specify("Comprehensive test 4^7", func() {
+    b := make([]byte, 7)
+    for augment(b, 4) {
+      p := string(b)
+      c.Expect(stringz.LongestSuffixAsPrefix(p), ContainsExactly, idiotLongestSuffixAsPrefix(p))
+    }
+  })
+}
+
+func BoyerMooreSpec(c gospec.Context) {
+  c.Specify("Comprehensive test 2^17", func() {
+    // p := "abaa"
+    // t := "aabaaaaaa"
+    // zr := stringz.PrecalcZboxesReversed(p)
+    // fmt.Printf("%s\nzr: %v\n", p, zr)
+    // c.Expect(stringz.BoyerMoore(p, t), ContainsExactly, idiotStringSearch(p, t))
+    // panic('a')
+    b := make([]byte, 17)
+    for augment(b, 2) {
+      p := string(b[0 : 5])
+      t := string(b[5 :  ])
+      bm_m := stringz.BoyerMoore(p, t)
+      i_m := idiotStringSearch(p, t)
+      if !same(bm_m, i_m) {
+        fmt.Printf("p: %v\n", (b[0:5]))
+        fmt.Printf("t: %v\n", (b[5:]))
+        fmt.Printf("b: %v\n", bm_m)
+        fmt.Printf("i: %v\n", i_m)
+        fmt.Printf("\n")
+      }
+      c.Expect(stringz.BoyerMoore(p, t), ContainsExactly, idiotStringSearch(p, t))
+    }
+  })
+
+  c.Specify("Comprehensive test 3^9", func() {
+    b := make([]byte, 11)
+    for augment(b, 3) {
+      p := string(b[0 : 4])
+      t := string(b[4 :  ])
+      bm_m := stringz.BoyerMoore(p, t)
+      i_m := idiotStringSearch(p, t)
+      if !same(bm_m, i_m) {
+        fmt.Printf("p: %v\n", (b[0:5]))
+        fmt.Printf("t: %v\n", (b[5:]))
+        fmt.Printf("b: %v\n", bm_m)
+        fmt.Printf("i: %v\n", i_m)
+        fmt.Printf("\n")
+      }
+      c.Expect(stringz.BoyerMoore(p, t), ContainsExactly, idiotStringSearch(p, t))
+    }
+  })
+
+  c.Specify("Random test", func() {
+    for i := 0; i < 10000; i++ {
+      p := makeTestString4(15, 7, i)
+      t := makeTestString4(1000, 7, i)
+      bm_m := stringz.BoyerMoore(p, t)
+      i_m := idiotStringSearch(p, t)
+      if !same(bm_m, i_m) {
+        fmt.Printf("p: %s\n", p)
+        fmt.Printf("t: %s\n", t)
+        fmt.Printf("b: %v\n", bm_m)
+        fmt.Printf("i: %v\n", i_m)
+        fmt.Printf("\n")
+      }
+      c.Expect(stringz.BoyerMoore(p, t), ContainsExactly, idiotStringSearch(p, t))
+    }
   })
 
 }
