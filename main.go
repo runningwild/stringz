@@ -220,7 +220,7 @@ func BoyerMooreStrongGoodSuffixRule(p string) (L,l []int) {
 func BoyerMoore(p,t string) []int {
   var matches []int
   L,l := BoyerMooreStrongGoodSuffixRule(p)
-  // R := boyerMooreExtendedBadCharacterRule(p)
+  R := boyerMooreExtendedBadCharacterRule(p)
   k := len(p) - 1
   // fmt.Printf("L:  %v\nl;  %v\n", L, l)
 
@@ -245,9 +245,39 @@ func BoyerMoore(p,t string) []int {
       // i = len(p) - 1
       // h = k
     } else {
-      shift := L[i]
-      if shift == 0 {
-        // shift = l[i]
+      shift := 0
+      if L[i] == 0 {
+        shift = l[i]
+        min = len(p) - l[i]
+      } else {
+        shift = L[i]
+        min = 0
+        // if L[i] + i == len(p) {
+        //   println("L[",i,"] ==", L[i])
+        //   fmt.Printf("L: %v\n", L)
+        //   min = len(p) - i - 1
+        //   // panic("A")
+        //   // min = 0
+        // } else {
+        //   min = 0
+        // }
+      }
+      bc := R[t[h]]
+      if len(bc) == 0 {
+        shift = i + 1
+        min = 0
+      } else {
+        // fmt.Printf("@%d/%d: %v\n", h, i, bc)
+        for j := range bc {
+          if bc[j] < i {
+            if i - bc[j] > shift {
+              shift = i - bc[j]
+              min = 0
+              // fmt.Printf("Shift by %d\n", shift)
+            }
+            break
+          }
+        }
       }
       // println("Mismatch at ", i, ",", h, ",", k, " shift L=", L[i], "/", l[i])
       // r := i
@@ -264,12 +294,13 @@ func BoyerMoore(p,t string) []int {
         shift = 1
         // i = len(p) - 1
         // h = k
+        min = 0
       }
       k += shift
       // h += shift
       // fmt.Printf("Shift %d -> %d\n", i, i + shift)
       // i += shift
-      min = 0
+      // min = 0
     }
   }
   return matches
