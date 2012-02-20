@@ -438,8 +438,6 @@ func BoyerMooreSpec(c gospec.Context) {
     for augment(b, 2) {
       p := string(b[0:5])
       t := string(b[5:])
-      bm_m := stringz.BoyerMoore(p, t)
-      i_m := idiotStringSearch(p, t)
       c.Expect(stringz.BoyerMoore(p, t), ContainsExactly, idiotStringSearch(p, t))
     }
   })
