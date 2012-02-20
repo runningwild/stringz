@@ -222,16 +222,15 @@ func BoyerMoore(p,t string) []int {
   L,l := BoyerMooreStrongGoodSuffixRule(p)
   R := boyerMooreExtendedBadCharacterRule(p)
   k := len(p) - 1
-  // fmt.Printf("L:  %v\nl;  %v\n", L, l)
 
   // In some cases we don't need to go all the way to the left-most character
   // since we might know that a certain prefix of the current alignment
   // matches based on a previous test.
   min := 0
+
   for k < len(t) {
     i := len(p) - 1
     h := k
-    // fmt.Printf("State: %d %d %d\n", i, h, k)
     for i >= min && p[i] == t[h] {
       i--
       h--
@@ -241,75 +240,48 @@ func BoyerMoore(p,t string) []int {
       // found a match
       matches = append(matches, k - len(p) + 1)
       k += l[0]
+
+      // Since we matched we will know some prefix of the next alignment.
       min = len(p) - l[0]
-      // i = len(p) - 1
-      // h = k
     } else {
       shift := 0
+
+      // Strong good suffix rule
       if L[i] == 0 {
         shift = l[i]
+
+        // This shift can place part of what already matched as a prefix.
         min = len(p) - l[i]
       } else {
         shift = L[i]
         min = 0
-        // if L[i] + i == len(p) {
-        //   println("L[",i,"] ==", L[i])
-        //   fmt.Printf("L: %v\n", L)
-        //   min = len(p) - i - 1
-        //   // panic("A")
-        //   // min = 0
-        // } else {
-        //   min = 0
-        // }
       }
+
+      // Extended bad character rule
       bc := R[t[h]]
       if len(bc) == 0 {
         shift = i + 1
         min = 0
       } else {
-        // fmt.Printf("@%d/%d: %v\n", h, i, bc)
         for j := range bc {
           if bc[j] < i {
             if i - bc[j] > shift {
               shift = i - bc[j]
               min = 0
-              // fmt.Printf("Shift by %d\n", shift)
             }
             break
           }
         }
       }
-      // println("Mismatch at ", i, ",", h, ",", k, " shift L=", L[i], "/", l[i])
-      // r := i
-      // for _,v := range R[t[h]] {
-      //   if v < i {
-      //     r = i - v
-      //     break
-      //   }
-      // }
-      // if r > shift {
-      //   shift = r
-      // }
+
+      // Must always shift by at least one
       if shift == 0 {
         shift = 1
-        // i = len(p) - 1
-        // h = k
         min = 0
       }
+
       k += shift
-      // h += shift
-      // fmt.Printf("Shift %d -> %d\n", i, i + shift)
-      // i += shift
-      // min = 0
     }
   }
   return matches
-}
-
-func revString(s string) string {
-  b := []byte(s)
-  for i := 0; i < len(b) / 2; i++ {
-    b[i], b[len(b) - i - 1] = b[len(b) - i -1], b[i]
-  }
-  return string(b)
 }

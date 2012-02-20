@@ -29,6 +29,37 @@ func idiotZboxerReversed(p string) []int {
   return zs
 }
 
+func idiotStringSearch(p,t string) []int {
+  var matches []int
+  for i := 0; i < len(t) - len(p) + 1; i++ {
+    good := true
+    for j := 0; j < len(p) && j + i < len(t); j++ {
+      if p[j] != t[i+j] {
+        good = false
+        break
+      }
+    }
+    if good {
+      matches = append(matches, i)
+    }
+  }
+  return matches
+}
+
+func idiotLongestSuffixAsPrefix(p string) []int {
+  v := make([]int, len(p))
+  for i := range p {
+    for j := i; j < len(p); j++ {
+      s := p[j:]
+      if s == p[0:len(s)] {
+        v[i] = len(s)
+        break
+      }
+    }
+  }
+  return v
+}
+
 // Returns a string of length n of all the same character, c
 func makeTestString1(n int, c byte) string {
   b := make([]byte, n)
@@ -258,24 +289,10 @@ func ZBoxReverseSpec(c gospec.Context) {
   })
 }
 
-func idiotStringSearch(p,t string) []int {
-  var matches []int
-  for i := 0; i < len(t) - len(p) + 1; i++ {
-    good := true
-    for j := 0; j < len(p) && j + i < len(t); j++ {
-      if p[j] != t[i+j] {
-        good = false
-        break
-      }
-    }
-    if good {
-      matches = append(matches, i)
-    }
-  }
-  return matches
-}
-
-func BenchmarkBoyerMoore_10_100000(b *testing.B) {
+// BenchmarkBoyerMoore1* tests on a pattern and a text consisting of only one
+// character.  This should be the worst case for a correct Boyer-Moore because
+// it requires space to be allocated to return all of the matches.
+func BenchmarkBoyerMoore1_10_100000(b *testing.B) {
   b.StopTimer()
   p := makeTestString1(10, 0)
   t := makeTestString1(100000, 0)
@@ -285,7 +302,7 @@ func BenchmarkBoyerMoore_10_100000(b *testing.B) {
   }
 }
 
-func BenchmarkBoyerMoore_100_100000(b *testing.B) {
+func BenchmarkBoyerMoore1_100_100000(b *testing.B) {
   b.StopTimer()
   p := makeTestString1(100, 0)
   t := makeTestString1(100000, 0)
@@ -323,6 +340,9 @@ func BenchmarkBoyerMoore2_100_100000(b *testing.B) {
   }
 }
 
+// BenchmarkBoyerMoore3* tests for a pattern consisting only of characters
+// that are not found in the text.  These tests expect sublinear time that
+// should decrease with the size of the pattern.
 func BenchmarkBoyerMoore3_10_100000(b *testing.B) {
   b.StopTimer()
   p := makeTestString1(10, 0)
@@ -343,35 +363,50 @@ func BenchmarkBoyerMoore3_100_100000(b *testing.B) {
   }
 }
 
-func same(a,b []int) bool {
-  if len(a) != len(b) { return false }
-  for i := range a {
-    if a[i] != b[i] { return false }
+// BenchmarkBoyerMoore4* tests on random string with an alphabet size of 20,
+// like protein
+func BenchmarkBoyerMoore4_10_100000(b *testing.B) {
+  b.StopTimer()
+  p := makeTestString4(10, 20, 0)
+  t := makeTestString4(100000, 20, 1)
+  b.StartTimer()
+  for i := 0; i < b.N; i++ {
+    stringz.BoyerMoore(p, t)
   }
-  return true
 }
 
-func dstr(b []byte) string {
-  b2 := make([]byte, len(b))
-  for i := range b2 {
-    b2[i] += 'a'
+func BenchmarkBoyerMoore4_100_100000(b *testing.B) {
+  b.StopTimer()
+  p := makeTestString4(100, 20, 0)
+  t := makeTestString4(100000, 20, 1)
+  b.StartTimer()
+  for i := 0; i < b.N; i++ {
+    stringz.BoyerMoore(p, t)
   }
-  return string(b2)
 }
 
-func idiotLongestSuffixAsPrefix(p string) []int {
-  v := make([]int, len(p))
-  for i := range p {
-    for j := i; j < len(p); j++ {
-      s := p[j:]
-      if s == p[0:len(s)] {
-        v[i] = len(s)
-        break
-      }
-    }
+// BenchmarkBoyerMoore5* tests on random string with an alphabet size of 4,
+// like DNA
+func BenchmarkBoyerMoore5_10_100000(b *testing.B) {
+  b.StopTimer()
+  p := makeTestString4(10, 4, 0)
+  t := makeTestString4(100000, 4, 1)
+  b.StartTimer()
+  for i := 0; i < b.N; i++ {
+    stringz.BoyerMoore(p, t)
   }
-  return v
 }
+
+func BenchmarkBoyerMoore5_100_100000(b *testing.B) {
+  b.StopTimer()
+  p := makeTestString4(100, 4, 0)
+  t := makeTestString4(100000, 4, 1)
+  b.StartTimer()
+  for i := 0; i < b.N; i++ {
+    stringz.BoyerMoore(p, t)
+  }
+}
+
 func LongestSuffixAsPrefixSpec(c gospec.Context) {
   fmt.Printf("")
   c.Specify("Comprehensive test 2^15", func() {
@@ -399,45 +434,21 @@ func LongestSuffixAsPrefixSpec(c gospec.Context) {
 
 func BoyerMooreSpec(c gospec.Context) {
   c.Specify("Comprehensive test 2^17", func() {
-    // p := "abaa"
-    // t := "aabaaaaaa"
-    // zr := stringz.PrecalcZboxesReversed(p)
-    // fmt.Printf("%s\nzr: %v\n", p, zr)
-    // c.Expect(stringz.BoyerMoore(p, t), ContainsExactly, idiotStringSearch(p, t))
-    // panic('a')
     b := make([]byte, 17)
     for augment(b, 2) {
       p := string(b[0 : 5])
       t := string(b[5 :  ])
-        // fmt.Printf("p: %v\nt: %v\n", []byte(p), []byte(t))
       bm_m := stringz.BoyerMoore(p, t)
       i_m := idiotStringSearch(p, t)
-      if !same(bm_m, i_m) {
-        fmt.Printf("p: %v\nt: %v\n", []byte(p), []byte(t))
-        fmt.Printf("b: %v\n", bm_m)
-        fmt.Printf("i: %v\n", i_m)
-        fmt.Printf("\n")
-        panic("A")
-      }
       c.Expect(stringz.BoyerMoore(p, t), ContainsExactly, idiotStringSearch(p, t))
     }
   })
 
-  c.Specify("Comprehensive test 3^9", func() {
+  c.Specify("Comprehensive test 3^11", func() {
     b := make([]byte, 11)
     for augment(b, 3) {
       p := string(b[0 : 4])
       t := string(b[4 :  ])
-      bm_m := stringz.BoyerMoore(p, t)
-      i_m := idiotStringSearch(p, t)
-      if !same(bm_m, i_m) {
-        fmt.Printf("p: %v\n", (b[0:5]))
-        fmt.Printf("t: %v\n", (b[5:]))
-        fmt.Printf("b: %v\n", bm_m)
-        fmt.Printf("i: %v\n", i_m)
-        fmt.Printf("\n")
-        panic("A")
-      }
       c.Expect(stringz.BoyerMoore(p, t), ContainsExactly, idiotStringSearch(p, t))
     }
   })
@@ -446,16 +457,6 @@ func BoyerMooreSpec(c gospec.Context) {
     for i := 0; i < 10000; i+=2 {
       p := makeTestString4(15, 7, i)
       t := makeTestString4(1000, 7, i+1)
-      bm_m := stringz.BoyerMoore(p, t)
-      i_m := idiotStringSearch(p, t)
-      if !same(bm_m, i_m) {
-        fmt.Printf("p: %s\n", p)
-        fmt.Printf("t: %s\n", t)
-        fmt.Printf("b: %v\n", bm_m)
-        fmt.Printf("i: %v\n", i_m)
-        fmt.Printf("\n")
-        panic("A")
-      }
       c.Expect(stringz.BoyerMoore(p, t), ContainsExactly, idiotStringSearch(p, t))
     }
   })
