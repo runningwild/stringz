@@ -5,7 +5,6 @@ import (
   "testing"
 )
 
-
 func TestAllSpecs(t *testing.T) {
   r := gospec.NewRunner()
   r.AddSpec(ZBoxSpec)
@@ -14,4 +13,3 @@ func TestAllSpecs(t *testing.T) {
   r.AddSpec(BoyerMooreSpec)
   gospec.MainGoTest(r, t)
 }
-

@@ -4,15 +4,15 @@ import (
   "fmt"
   . "github.com/orfjackal/gospec/src/gospec"
   "github.com/orfjackal/gospec/src/gospec"
+  "math/rand"
   "runningwild/strings"
   "testing"
-  "math/rand"
 )
 
 func idiotZboxer(p string) []int {
   zs := make([]int, len(p))
   for i := range zs {
-    for zs[i] + i < len(p) && p[zs[i] + i] == p[zs[i]] {
+    for zs[i]+i < len(p) && p[zs[i]+i] == p[zs[i]] {
       zs[i]++
     }
   }
@@ -22,18 +22,18 @@ func idiotZboxer(p string) []int {
 func idiotZboxerReversed(p string) []int {
   zs := make([]int, len(p))
   for i := len(zs) - 1; i >= 0; i-- {
-    for i - zs[i] >= 0 && p[i - zs[i]] == p[len(p) - zs[i] - 1] {
+    for i-zs[i] >= 0 && p[i-zs[i]] == p[len(p)-zs[i]-1] {
       zs[i]++
     }
   }
   return zs
 }
 
-func idiotStringSearch(p,t string) []int {
+func idiotStringSearch(p, t string) []int {
   var matches []int
-  for i := 0; i < len(t) - len(p) + 1; i++ {
+  for i := 0; i < len(t)-len(p)+1; i++ {
     good := true
-    for j := 0; j < len(p) && j + i < len(t); j++ {
+    for j := 0; j < len(p) && j+i < len(t); j++ {
       if p[j] != t[i+j] {
         good = false
         break
@@ -73,14 +73,14 @@ func makeTestString1(n int, c byte) string {
 // different character
 func makeTestString2(n int) string {
   b := make([]byte, n)
-  for i := n/2; i < n; i++ {
+  for i := n / 2; i < n; i++ {
     b[i] = 1
   }
   return string(b)
 }
 
 // Returns a string of length n, cycling through the number 0-(r-1)
-func makeTestString3(n,r int) string {
+func makeTestString3(n, r int) string {
   b := make([]byte, n)
   for i := range b {
     b[i] = byte(i % r)
@@ -90,7 +90,7 @@ func makeTestString3(n,r int) string {
 
 // Returns a string of length n consisting of random characters less than r,
 // and using seed s
-func makeTestString4(n,r,s int) string {
+func makeTestString4(n, r, s int) string {
   rand.Seed(int64(s))
   b := make([]byte, n)
   for i := range b {
@@ -173,8 +173,8 @@ func BenchmarkZBox4_1M(b *testing.B) {
 
 func augment(b []byte, radix int) bool {
   for i := range b {
-  if int(b[i]) < radix - 1 {
-    b[i]++
+    if int(b[i]) < radix-1 {
+      b[i]++
       return true
     } else {
       b[i] = 0
@@ -436,8 +436,8 @@ func BoyerMooreSpec(c gospec.Context) {
   c.Specify("Comprehensive test 2^17", func() {
     b := make([]byte, 17)
     for augment(b, 2) {
-      p := string(b[0 : 5])
-      t := string(b[5 :  ])
+      p := string(b[0:5])
+      t := string(b[5:])
       bm_m := stringz.BoyerMoore(p, t)
       i_m := idiotStringSearch(p, t)
       c.Expect(stringz.BoyerMoore(p, t), ContainsExactly, idiotStringSearch(p, t))
@@ -447,14 +447,14 @@ func BoyerMooreSpec(c gospec.Context) {
   c.Specify("Comprehensive test 3^11", func() {
     b := make([]byte, 11)
     for augment(b, 3) {
-      p := string(b[0 : 4])
-      t := string(b[4 :  ])
+      p := string(b[0:4])
+      t := string(b[4:])
       c.Expect(stringz.BoyerMoore(p, t), ContainsExactly, idiotStringSearch(p, t))
     }
   })
 
   c.Specify("Random test", func() {
-    for i := 0; i < 10000; i+=2 {
+    for i := 0; i < 10000; i += 2 {
       p := makeTestString4(15, 7, i)
       t := makeTestString4(1000, 7, i+1)
       c.Expect(stringz.BoyerMoore(p, t), ContainsExactly, idiotStringSearch(p, t))

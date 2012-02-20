@@ -3,10 +3,14 @@ package stringz
 // import "fmt"
 
 func PrecalcZboxes(p string) []int {
-  if len(p) == 0 { return nil }
-  if len(p) == 1 { return []int{ len(p) } }
+  if len(p) == 0 {
+    return nil
+  }
+  if len(p) == 1 {
+    return []int{len(p)}
+  }
   pos := 1
-  for pos < len(p) && p[pos] == p[pos - 1] {
+  for pos < len(p) && p[pos] == p[pos-1] {
     pos++
   }
 
@@ -21,7 +25,7 @@ func PrecalcZboxes(p string) []int {
       // We just left a zbox - so we need to see how much of a prefix we have
       // from this position
       pos := i
-      for pos < len(p) && p[pos] == p[pos - i] {
+      for pos < len(p) && p[pos] == p[pos-i] {
         pos++
       }
       zs[i] = pos - i
@@ -58,10 +62,14 @@ func PrecalcZboxes(p string) []int {
 // Returns l such that l[i] is the length of the longest suffix of p[1:]
 // that is a prefix of p, 0 if such a suffix does not exist.
 func LongestSuffixAsPrefix(p string) []int {
-  if len(p) == 0 { return nil }
-  if len(p) == 1 { return []int{ len(p) } }
+  if len(p) == 0 {
+    return nil
+  }
+  if len(p) == 1 {
+    return []int{len(p)}
+  }
   pos := 1
-  for pos < len(p) && p[pos] == p[pos - 1] {
+  for pos < len(p) && p[pos] == p[pos-1] {
     pos++
   }
 
@@ -81,7 +89,7 @@ func LongestSuffixAsPrefix(p string) []int {
       // We just left a zbox - so we need to see how much of a prefix we have
       // from this position
       pos := i
-      for pos < len(p) && p[pos] == p[pos - i] {
+      for pos < len(p) && p[pos] == p[pos-i] {
         pos++
       }
       left = i
@@ -131,16 +139,20 @@ func LongestSuffixAsPrefix(p string) []int {
 
 func PrecalcZboxesReversed(p string) []int {
   n := len(p)
-  if n == 0 { return nil }
-  if n == 1 { return []int{ n } }
+  if n == 0 {
+    return nil
+  }
+  if n == 1 {
+    return []int{n}
+  }
   pos := n - 2
-  for pos >= 0 && p[pos] == p[pos + 1] {
+  for pos >= 0 && p[pos] == p[pos+1] {
     pos--
   }
 
   zs := make([]int, n)
-  zs[n - 1] = n
-  zs[n - 2] = n - pos - 2
+  zs[n-1] = n
+  zs[n-2] = n - pos - 2
 
   left := pos + 1
   right := n - 2
@@ -149,7 +161,7 @@ func PrecalcZboxesReversed(p string) []int {
       // We just left a zbox - so we need to see how much of a suffix we have
       // from this position
       pos := i
-      for pos >= 0 && p[pos] == p[n - (i - pos) - 1] {
+      for pos >= 0 && p[pos] == p[n-(i-pos)-1] {
         pos--
       }
       zs[i] = i - pos
@@ -158,7 +170,7 @@ func PrecalcZboxesReversed(p string) []int {
     } else {
       j := right - i
       rem := i - left + 1
-      zj := zs[n - j - 1]
+      zj := zs[n-j-1]
       if zj < rem {
         // The old z-value shows us that we have a prefix here that is less
         // than the length remaining in out current z-box, so we use that
@@ -197,19 +209,21 @@ func boyerMooreExtendedBadCharacterRule(p string) map[byte][]int {
 // L here is not exactly as specified in Gusfield, since the value used when
 // determining shifts is always n - L'(i) we just do that math now rather than
 // later.
-func BoyerMooreStrongGoodSuffixRule(p string) (L,l []int) {
+func BoyerMooreStrongGoodSuffixRule(p string) (L, l []int) {
   Z := PrecalcZboxesReversed(p)
   L = make([]int, len(p))
-  for i := 0; i < len(Z) - 1; i++ {
-    if Z[i] == 0 { continue }
-    L[len(p) - Z[i] - 1] = len(p) - i - 1
+  for i := 0; i < len(Z)-1; i++ {
+    if Z[i] == 0 {
+      continue
+    }
+    L[len(p)-Z[i]-1] = len(p) - i - 1
   }
 
   l = LongestSuffixAsPrefix(p)
-  for i := 0; i < len(l) - 1; i++ {
+  for i := 0; i < len(l)-1; i++ {
     l[i] = len(p) - l[i+1]
   }
-  l[len(l) - 1] = 0
+  l[len(l)-1] = 0
   return
 }
 
@@ -217,9 +231,9 @@ func BoyerMooreStrongGoodSuffixRule(p string) (L,l []int) {
 // A detail was left out of Gusfield - in certain shifts we might know that a
 // prefix of the current alignment matches, we need to keep track of that to
 // avoid quadratic runtime.
-func BoyerMoore(p,t string) []int {
+func BoyerMoore(p, t string) []int {
   var matches []int
-  L,l := BoyerMooreStrongGoodSuffixRule(p)
+  L, l := BoyerMooreStrongGoodSuffixRule(p)
   R := boyerMooreExtendedBadCharacterRule(p)
   k := len(p) - 1
 
@@ -238,7 +252,7 @@ func BoyerMoore(p,t string) []int {
 
     if i < min {
       // found a match
-      matches = append(matches, k - len(p) + 1)
+      matches = append(matches, k-len(p)+1)
       k += l[0]
 
       // Since we matched we will know some prefix of the next alignment.
@@ -265,7 +279,7 @@ func BoyerMoore(p,t string) []int {
       } else {
         for j := range bc {
           if bc[j] < i {
-            if i - bc[j] > shift {
+            if i-bc[j] > shift {
               shift = i - bc[j]
               min = 0
             }
