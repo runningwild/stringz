@@ -195,10 +195,10 @@ func PrecalcZboxesReversed(p string) []int {
   return zs
 }
 
-// Might want to have a specialized boyer-moore for small alphabets like
-// ascii, dna, protein.
-func boyerMooreExtendedBadCharacterRule(p string) map[byte][]int {
-  m := make(map[byte][]int)
+// Requires knowledge of the alphabet size so that we avoid doin hashtable
+// lookups.
+func boyerMooreExtendedBadCharacterRule(p string, alpha_size int) [][]int {
+  m := make([][]int, alpha_size)
   for i := len(p) - 1; i >= 0; i-- {
     r := p[i]
     m[r] = append(m[r], i)
@@ -234,7 +234,7 @@ func BoyerMooreStrongGoodSuffixRule(p string) (L, l []int) {
 func BoyerMoore(p, t string) []int {
   var matches []int
   L, l := BoyerMooreStrongGoodSuffixRule(p)
-  R := boyerMooreExtendedBadCharacterRule(p)
+  R := boyerMooreExtendedBadCharacterRule(p, 256)
   k := len(p) - 1
 
   // In some cases we don't need to go all the way to the left-most character
