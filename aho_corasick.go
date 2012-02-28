@@ -16,7 +16,11 @@ type ahBfs struct {
 }
 
 func AhoCorasickPreprocessSet(datas [][]byte) []acNode {
-  nodes := []acNode{ acNode{} }
+  total_len := 0
+  for i := range datas {
+    total_len += len(datas[i])
+  }
+  nodes := make([]acNode, total_len + 1)[0:1]
   for i,data := range datas {
     cur := 0
     for _,b := range data {
