@@ -4,6 +4,7 @@ import (
   . "github.com/orfjackal/gospec/src/gospec"
   "github.com/orfjackal/gospec/src/gospec"
   "github.com/runningwild/stringz"
+  "testing"
 )
 
 func idiotAhoCorasick(ps [][]byte, t []byte) [][]int {
@@ -100,3 +101,59 @@ func AhoCorasickSpec(c gospec.Context) {
     }
   })
 }
+
+func BenchmarkAhoCorasick4_10x10_100000(b *testing.B) {
+  b.StopTimer()
+  ps := [][]byte{
+    []byte(makeTestString4(5, 10, 0)),
+    []byte(makeTestString4(5, 10, 1)),
+    []byte(makeTestString4(5, 10, 2)),
+    []byte(makeTestString4(5, 10, 3)),
+    []byte(makeTestString4(5, 10, 4)),
+    []byte(makeTestString4(5, 10, 5)),
+    []byte(makeTestString4(5, 10, 6)),
+    []byte(makeTestString4(5, 10, 7)),
+    []byte(makeTestString4(5, 10, 8)),
+    []byte(makeTestString4(5, 10, 9)),
+  }
+  t := []byte(makeTestString4(100000, 10, 10))
+  b.StartTimer()
+  for i := 0; i < b.N; i++ {
+    stringz.AhoCorasick(ps, t)
+  }
+}
+
+func BenchmarkAhoCorasick4_100x10_100000(b *testing.B) {
+  b.StopTimer()
+  ps := make([][]byte, 100)
+  for i := range ps {
+    ps[i] = []byte(makeTestString4(5, 10, i))
+  }
+  t := []byte(makeTestString4(100000, 10, len(ps)))
+  b.StartTimer()
+  for i := 0; i < b.N; i++ {
+    stringz.AhoCorasick(ps, t)
+  }
+}
+
+func BenchmarkAhoCorasick4_10x10_1000000(b *testing.B) {
+  b.StopTimer()
+  ps := [][]byte{
+    []byte(makeTestString4(5, 10, 0)),
+    []byte(makeTestString4(5, 10, 1)),
+    []byte(makeTestString4(5, 10, 2)),
+    []byte(makeTestString4(5, 10, 3)),
+    []byte(makeTestString4(5, 10, 4)),
+    []byte(makeTestString4(5, 10, 5)),
+    []byte(makeTestString4(5, 10, 6)),
+    []byte(makeTestString4(5, 10, 7)),
+    []byte(makeTestString4(5, 10, 8)),
+    []byte(makeTestString4(5, 10, 9)),
+  }
+  t := []byte(makeTestString4(1000000, 10, 10))
+  b.StartTimer()
+  for i := 0; i < b.N; i++ {
+    stringz.AhoCorasick(ps, t)
+  }
+}
+
