@@ -5,7 +5,7 @@ import (
   . "github.com/orfjackal/gospec/src/gospec"
   "github.com/orfjackal/gospec/src/gospec"
   "math/rand"
-  "runningwild/strings"
+  "github.com/runningwild/stringz"
   "testing"
 )
 
