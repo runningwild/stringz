@@ -458,5 +458,16 @@ func BoyerMooreSpec(c gospec.Context) {
       c.Expect(stringz.BoyerMoore(p, t), ContainsExactly, idiotStringSearch(p, t))
     }
   })
+}
 
+func AhoCorasickSpec(c gospec.Context) {
+  strs := [][]byte{
+    []byte("baa"),
+    []byte("anba"),
+    []byte("banana"),
+  }
+  res := stringz.AhoCorasick(strs, []byte("baababanananba"))
+  c.Expect(res[0], ContainsExactly, []int{0})
+  c.Expect(res[1], ContainsExactly, []int{10})
+  c.Expect(res[2], ContainsExactly, []int{5})
 }
