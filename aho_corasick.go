@@ -1,7 +1,5 @@
 package stringz
 
-import "fmt"
-
 type acNode struct {
   // Index into the acNodeArray for a given character
   next [256]int
@@ -11,17 +9,6 @@ type acNode struct {
 
   // This node indicates that the following elements matched
   matches []int
-}
-
-func (a acNode) String() string {
-  s := fmt.Sprintf("Next: ")
-  for i,n := range a.next {
-    if n == 0 { continue }
-    s += fmt.Sprintf("(%c -> %d) ", i, n)
-  }
-  s += fmt.Sprintf("\nFailure: %d\n", a.failure)
-  s += fmt.Sprintf("Matches: %v\n", a.matches)
-  return s
 }
 
 type ahBfs struct {
@@ -64,10 +51,8 @@ func AhoCorasickPreprocessSet(datas [][]byte) []acNode {
     q = q[1:]
     mod := nodes[bfs.node].failure
     edge := datas[bfs.data][bfs.index]
-    fmt.Printf("Modstart: %d\n", mod)
     for mod != 0 && nodes[mod].next[edge] == 0 {
       mod = nodes[mod].failure
-      fmt.Printf("mod: %d\n", mod)
     }
     source := nodes[bfs.node].next[edge]
     if nodes[source].failure == 0 {
@@ -77,17 +62,11 @@ func AhoCorasickPreprocessSet(datas [][]byte) []acNode {
         nodes[source].matches = append(nodes[source].matches, m)
       }
     }
-    fmt.Printf("%s(%d): mod(%d) failure(%d)\n", datas[bfs.data], bfs.index, mod, nodes[nodes[bfs.node].next[edge]].failure)
-    fmt.Printf("Op: %d\n", nodes[bfs.node].next[edge])
     bfs.node = nodes[bfs.node].next[edge]
     bfs.index++
     if bfs.index < len(datas[bfs.data]) {
       q = append(q, bfs)
     }
-  }
-
-  for i := range nodes {
-    fmt.Printf("Node(%d):\n%v\n", i, nodes[i])
   }
 
   return nodes
@@ -98,7 +77,6 @@ func AhoCorasick(datas [][]byte, t []byte) [][]int {
   cur := 0
   matches := make([][]int, len(datas))
   for i, c := range t {
-    fmt.Printf("Checking %d\n", cur)
     for _, m := range nodes[cur].matches {
       matches[m] = append(matches[m], i - len(datas[m]))
     }
@@ -112,7 +90,6 @@ func AhoCorasick(datas [][]byte, t []byte) [][]int {
     }
     cur = nodes[cur].next[c]
   }
-    fmt.Printf("Checking %d\n", cur)
   for _, m := range nodes[cur].matches {
     matches[m] = append(matches[m], len(t) - len(datas[m]))
   }
