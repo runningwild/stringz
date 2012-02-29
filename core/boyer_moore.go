@@ -1,8 +1,8 @@
-package stringz
+package core
 
 // import "fmt"
 
-func PrecalcZboxes(p string) []int {
+func PrecalcZboxes(p []byte) []int {
   if len(p) == 0 {
     return nil
   }
@@ -61,7 +61,7 @@ func PrecalcZboxes(p string) []int {
 
 // Returns l such that l[i] is the length of the longest suffix of p[1:]
 // that is a prefix of p, 0 if such a suffix does not exist.
-func LongestSuffixAsPrefix(p string) []int {
+func LongestSuffixAsPrefix(p []byte) []int {
   if len(p) == 0 {
     return nil
   }
@@ -137,7 +137,7 @@ func LongestSuffixAsPrefix(p string) []int {
   return ps
 }
 
-func PrecalcZboxesReversed(p string) []int {
+func PrecalcZboxesReversed(p []byte) []int {
   n := len(p)
   if n == 0 {
     return nil
@@ -197,7 +197,7 @@ func PrecalcZboxesReversed(p string) []int {
 
 // Requires knowledge of the alphabet size so that we avoid doin hashtable
 // lookups.
-func boyerMooreExtendedBadCharacterRule(p string, alpha_size int) [][]int {
+func boyerMooreExtendedBadCharacterRule(p []byte, alpha_size int) [][]int {
   m := make([][]int, alpha_size)
   for i := len(p) - 1; i >= 0; i-- {
     r := p[i]
@@ -209,7 +209,7 @@ func boyerMooreExtendedBadCharacterRule(p string, alpha_size int) [][]int {
 // L here is not exactly as specified in Gusfield, since the value used when
 // determining shifts is always n - L'(i) we just do that math now rather than
 // later.
-func BoyerMooreStrongGoodSuffixRule(p string) (L, l []int) {
+func BoyerMooreStrongGoodSuffixRule(p []byte) (L, l []int) {
   Z := PrecalcZboxesReversed(p)
   L = make([]int, len(p))
   for i := 0; i < len(Z)-1; i++ {
@@ -227,15 +227,33 @@ func BoyerMooreStrongGoodSuffixRule(p string) (L, l []int) {
   return
 }
 
+type bmData struct {
+  // Copy of the pattern
+  p []byte
+
+  // Output from BoyreMooreStrongGoodSuffixRule
+  L, l []int
+
+  // Output from boyerMooreExtendedBadCharacterRule
+  R [][]int
+}
+
+func BoyerMoorePreprocess(p []byte) bmData {
+  var bmd bmData
+  bmd.p = make([]byte, len(p))
+  copy(bmd.p, p)
+  bmd.L, bmd.l = BoyerMooreStrongGoodSuffixRule(p)
+  bmd.R = boyerMooreExtendedBadCharacterRule(p, 256)
+  return bmd
+}
+
 // Implementation of the Boyer-Moore string search, as detailed in Gusfield.
 // A detail was left out of Gusfield - in certain shifts we might know that a
 // prefix of the current alignment matches, we need to keep track of that to
 // avoid quadratic runtime.
-func BoyerMoore(p, t string) []int {
+func BoyerMoore(bmd bmData, t []byte) []int {
   var matches []int
-  L, l := BoyerMooreStrongGoodSuffixRule(p)
-  R := boyerMooreExtendedBadCharacterRule(p, 256)
-  k := len(p) - 1
+  k := len(bmd.L) - 1
 
   // In some cases we don't need to go all the way to the left-most character
   // since we might know that a certain prefix of the current alignment
@@ -243,36 +261,36 @@ func BoyerMoore(p, t string) []int {
   min := 0
 
   for k < len(t) {
-    i := len(p) - 1
+    i := len(bmd.L) - 1
     h := k
-    for i >= min && p[i] == t[h] {
+    for i >= min && bmd.p[i] == t[h] {
       i--
       h--
     }
 
     if i < min {
       // found a match
-      matches = append(matches, k-len(p)+1)
-      k += l[0]
+      matches = append(matches, k-len(bmd.L)+1)
+      k += bmd.l[0]
 
       // Since we matched we will know some prefix of the next alignment.
-      min = len(p) - l[0]
+      min = len(bmd.L) - bmd.l[0]
     } else {
       shift := 0
 
       // Strong good suffix rule
-      if L[i] == 0 {
-        shift = l[i]
+      if bmd.L[i] == 0 {
+        shift = bmd.l[i]
 
         // This shift can place part of what already matched as a prefix.
-        min = len(p) - l[i]
+        min = len(bmd.L) - bmd.l[i]
       } else {
-        shift = L[i]
+        shift = bmd.L[i]
         min = 0
       }
 
       // Extended bad character rule
-      bc := R[t[h]]
+      bc := bmd.R[t[h]]
       if len(bc) == 0 {
         shift = i + 1
         min = 0

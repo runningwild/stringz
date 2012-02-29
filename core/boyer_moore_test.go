@@ -1,14 +1,14 @@
-package stringz_test
+package core_test
 
 import (
   "fmt"
   . "github.com/orfjackal/gospec/src/gospec"
   "github.com/orfjackal/gospec/src/gospec"
-  "github.com/runningwild/stringz"
+  "github.com/runningwild/stringz/core"
   "testing"
 )
 
-func idiotZboxer(p string) []int {
+func idiotZboxer(p []byte) []int {
   zs := make([]int, len(p))
   for i := range zs {
     for zs[i]+i < len(p) && p[zs[i]+i] == p[zs[i]] {
@@ -18,7 +18,7 @@ func idiotZboxer(p string) []int {
   return zs
 }
 
-func idiotZboxerReversed(p string) []int {
+func idiotZboxerReversed(p []byte) []int {
   zs := make([]int, len(p))
   for i := len(zs) - 1; i >= 0; i-- {
     for i-zs[i] >= 0 && p[i-zs[i]] == p[len(p)-zs[i]-1] {
@@ -28,7 +28,7 @@ func idiotZboxerReversed(p string) []int {
   return zs
 }
 
-func idiotStringSearch(p, t string) []int {
+func idiotStringSearch(p, t []byte) []int {
   var matches []int
   for i := 0; i < len(t)-len(p)+1; i++ {
     good := true
@@ -45,12 +45,12 @@ func idiotStringSearch(p, t string) []int {
   return matches
 }
 
-func idiotLongestSuffixAsPrefix(p string) []int {
+func idiotLongestSuffixAsPrefix(p []byte) []int {
   v := make([]int, len(p))
   for i := range p {
     for j := i; j < len(p); j++ {
       s := p[j:]
-      if s == p[0:len(s)] {
+      if string(s) == string(p[0:len(s)]) {
         v[i] = len(s)
         break
       }
@@ -64,7 +64,7 @@ func BenchmarkZBox1_100k(b *testing.B) {
   p := makeTestString1(100000, 0)
   b.StartTimer()
   for i := 0; i < b.N; i++ {
-    stringz.PrecalcZboxes(p)
+    core.PrecalcZboxes(p)
   }
 }
 
@@ -73,7 +73,7 @@ func BenchmarkZBox1_1M(b *testing.B) {
   p := makeTestString1(1000000, 0)
   b.StartTimer()
   for i := 0; i < b.N; i++ {
-    stringz.PrecalcZboxes(p)
+    core.PrecalcZboxes(p)
   }
 }
 
@@ -82,7 +82,7 @@ func BenchmarkZBox2_100k(b *testing.B) {
   p := makeTestString2(100000)
   b.StartTimer()
   for i := 0; i < b.N; i++ {
-    stringz.PrecalcZboxes(p)
+    core.PrecalcZboxes(p)
   }
 }
 
@@ -91,7 +91,7 @@ func BenchmarkZBox2_1M(b *testing.B) {
   p := makeTestString2(1000000)
   b.StartTimer()
   for i := 0; i < b.N; i++ {
-    stringz.PrecalcZboxes(p)
+    core.PrecalcZboxes(p)
   }
 }
 
@@ -100,7 +100,7 @@ func BenchmarkZBox3_100k(b *testing.B) {
   p := makeTestString3(100000, 255)
   b.StartTimer()
   for i := 0; i < b.N; i++ {
-    stringz.PrecalcZboxes(p)
+    core.PrecalcZboxes(p)
   }
 }
 
@@ -109,7 +109,7 @@ func BenchmarkZBox3_1M(b *testing.B) {
   p := makeTestString3(1000000, 255)
   b.StartTimer()
   for i := 0; i < b.N; i++ {
-    stringz.PrecalcZboxes(p)
+    core.PrecalcZboxes(p)
   }
 }
 
@@ -118,7 +118,7 @@ func BenchmarkZBox4_100k(b *testing.B) {
   p := makeTestString4(100000, 256, 1)
   b.StartTimer()
   for i := 0; i < b.N; i++ {
-    stringz.PrecalcZboxes(p)
+    core.PrecalcZboxes(p)
   }
 }
 
@@ -127,113 +127,109 @@ func BenchmarkZBox4_1M(b *testing.B) {
   p := makeTestString4(1000000, 256, 1)
   b.StartTimer()
   for i := 0; i < b.N; i++ {
-    stringz.PrecalcZboxes(p)
+    core.PrecalcZboxes(p)
   }
 }
 
 func ZBoxSpec(c gospec.Context) {
   c.Specify("Comprehensive test 3^9", func() {
-    b := make([]byte, 9)
-    for augment(b, 3) {
-      p := string(b)
-      c.Expect(stringz.PrecalcZboxes(p), ContainsExactly, idiotZboxer(p))
+    p := make([]byte, 9)
+    for augment(p, 3) {
+      c.Expect(core.PrecalcZboxes(p), ContainsExactly, idiotZboxer(p))
     }
   })
   c.Specify("Comprehensive test 2^15", func() {
-    b := make([]byte, 15)
-    for augment(b, 2) {
-      p := string(b)
-      c.Expect(stringz.PrecalcZboxes(p), ContainsExactly, idiotZboxer(p))
+    p := make([]byte, 15)
+    for augment(p, 2) {
+      c.Expect(core.PrecalcZboxes(p), ContainsExactly, idiotZboxer(p))
     }
   })
   c.Specify("Basic test.", func() {
     p := ""
-    c.Expect(stringz.PrecalcZboxes(p), ContainsExactly, idiotZboxer(p))
+    c.Expect(core.PrecalcZboxes([]byte(p)), ContainsExactly, idiotZboxer([]byte(p)))
     p = "a"
-    c.Expect(stringz.PrecalcZboxes(p), ContainsExactly, idiotZboxer(p))
+    c.Expect(core.PrecalcZboxes([]byte(p)), ContainsExactly, idiotZboxer([]byte(p)))
     p = "abcabc"
-    c.Expect(stringz.PrecalcZboxes(p), ContainsExactly, idiotZboxer(p))
+    c.Expect(core.PrecalcZboxes([]byte(p)), ContainsExactly, idiotZboxer([]byte(p)))
     p = "aabcabc"
-    c.Expect(stringz.PrecalcZboxes(p), ContainsExactly, idiotZboxer(p))
+    c.Expect(core.PrecalcZboxes([]byte(p)), ContainsExactly, idiotZboxer([]byte(p)))
     p = "aaabcabc"
-    c.Expect(stringz.PrecalcZboxes(p), ContainsExactly, idiotZboxer(p))
+    c.Expect(core.PrecalcZboxes([]byte(p)), ContainsExactly, idiotZboxer([]byte(p)))
     p = "aabcaabc"
-    c.Expect(stringz.PrecalcZboxes(p), ContainsExactly, idiotZboxer(p))
+    c.Expect(core.PrecalcZboxes([]byte(p)), ContainsExactly, idiotZboxer([]byte(p)))
     p = "aabcaaabc"
-    c.Expect(stringz.PrecalcZboxes(p), ContainsExactly, idiotZboxer(p))
+    c.Expect(core.PrecalcZboxes([]byte(p)), ContainsExactly, idiotZboxer([]byte(p)))
     p = "aabcaaaabc"
-    c.Expect(stringz.PrecalcZboxes(p), ContainsExactly, idiotZboxer(p))
+    c.Expect(core.PrecalcZboxes([]byte(p)), ContainsExactly, idiotZboxer([]byte(p)))
     p = "aabcaaaabc*aabcaaaabc"
-    c.Expect(stringz.PrecalcZboxes(p), ContainsExactly, idiotZboxer(p))
+    c.Expect(core.PrecalcZboxes([]byte(p)), ContainsExactly, idiotZboxer([]byte(p)))
     p = "aabcaaaabc*aabcaaaabc*aabcaaaabc*aabcaaaabc*aabcaaaabc"
-    c.Expect(stringz.PrecalcZboxes(p), ContainsExactly, idiotZboxer(p))
+    c.Expect(core.PrecalcZboxes([]byte(p)), ContainsExactly, idiotZboxer([]byte(p)))
     p = "abcdefghijklmnopq"
-    c.Expect(stringz.PrecalcZboxes(p), ContainsExactly, idiotZboxer(p))
+    c.Expect(core.PrecalcZboxes([]byte(p)), ContainsExactly, idiotZboxer([]byte(p)))
     p = "abcdefghijklmnopqabcdefghijklmnopqabcdefghijklmnopq"
-    c.Expect(stringz.PrecalcZboxes(p), ContainsExactly, idiotZboxer(p))
+    c.Expect(core.PrecalcZboxes([]byte(p)), ContainsExactly, idiotZboxer([]byte(p)))
     p = "abcdefghijklmnopqabc efghijklmnopqab cdefghijklmnopq"
-    c.Expect(stringz.PrecalcZboxes(p), ContainsExactly, idiotZboxer(p))
+    c.Expect(core.PrecalcZboxes([]byte(p)), ContainsExactly, idiotZboxer([]byte(p)))
     p = "aaaaaaaaaaaaaaaaaa"
-    c.Expect(stringz.PrecalcZboxes(p), ContainsExactly, idiotZboxer(p))
+    c.Expect(core.PrecalcZboxes([]byte(p)), ContainsExactly, idiotZboxer([]byte(p)))
     p = "bbbbbbbbbbbaaaaaaaaaaaa"
-    c.Expect(stringz.PrecalcZboxes(p), ContainsExactly, idiotZboxer(p))
+    c.Expect(core.PrecalcZboxes([]byte(p)), ContainsExactly, idiotZboxer([]byte(p)))
     p = "bbbbbbbaaaaaaaaabbbbbbbbbbbbbbaaaabbbbbbbbbaaaaabbaaaaaaaaabbaa"
-    c.Expect(stringz.PrecalcZboxes(p), ContainsExactly, idiotZboxer(p))
+    c.Expect(core.PrecalcZboxes([]byte(p)), ContainsExactly, idiotZboxer([]byte(p)))
     p = "aabbaaa"
-    c.Expect(stringz.PrecalcZboxes(p), ContainsExactly, idiotZboxer(p))
+    c.Expect(core.PrecalcZboxes([]byte(p)), ContainsExactly, idiotZboxer([]byte(p)))
   })
 }
 
 func ZBoxReverseSpec(c gospec.Context) {
   c.Specify("Comprehensive test 3^9", func() {
-    b := make([]byte, 9)
-    for augment(b, 3) {
-      p := string(b)
-      c.Expect(stringz.PrecalcZboxesReversed(p), ContainsExactly, idiotZboxerReversed(p))
+    p := make([]byte, 9)
+    for augment(p, 3) {
+      c.Expect(core.PrecalcZboxesReversed(p), ContainsExactly, idiotZboxerReversed(p))
     }
   })
   c.Specify("Comprehensive test 2^15", func() {
-    b := make([]byte, 15)
-    for augment(b, 2) {
-      p := string(b)
-      c.Expect(stringz.PrecalcZboxesReversed(p), ContainsExactly, idiotZboxerReversed(p))
+    p := make([]byte, 15)
+    for augment(p, 2) {
+      c.Expect(core.PrecalcZboxesReversed(p), ContainsExactly, idiotZboxerReversed(p))
     }
   })
   c.Specify("Basic test.", func() {
     p := ""
-    c.Expect(stringz.PrecalcZboxesReversed(p), ContainsExactly, idiotZboxerReversed(p))
+    c.Expect(core.PrecalcZboxesReversed([]byte(p)), ContainsExactly, idiotZboxerReversed([]byte(p)))
     p = "a"
-    c.Expect(stringz.PrecalcZboxesReversed(p), ContainsExactly, idiotZboxerReversed(p))
+    c.Expect(core.PrecalcZboxesReversed([]byte(p)), ContainsExactly, idiotZboxerReversed([]byte(p)))
     p = "abcabc"
-    c.Expect(stringz.PrecalcZboxesReversed(p), ContainsExactly, idiotZboxerReversed(p))
+    c.Expect(core.PrecalcZboxesReversed([]byte(p)), ContainsExactly, idiotZboxerReversed([]byte(p)))
     p = "aabcabc"
-    c.Expect(stringz.PrecalcZboxesReversed(p), ContainsExactly, idiotZboxerReversed(p))
+    c.Expect(core.PrecalcZboxesReversed([]byte(p)), ContainsExactly, idiotZboxerReversed([]byte(p)))
     p = "aaabcabc"
-    c.Expect(stringz.PrecalcZboxesReversed(p), ContainsExactly, idiotZboxerReversed(p))
+    c.Expect(core.PrecalcZboxesReversed([]byte(p)), ContainsExactly, idiotZboxerReversed([]byte(p)))
     p = "aabcaabc"
-    c.Expect(stringz.PrecalcZboxesReversed(p), ContainsExactly, idiotZboxerReversed(p))
+    c.Expect(core.PrecalcZboxesReversed([]byte(p)), ContainsExactly, idiotZboxerReversed([]byte(p)))
     p = "aabcaaabc"
-    c.Expect(stringz.PrecalcZboxesReversed(p), ContainsExactly, idiotZboxerReversed(p))
+    c.Expect(core.PrecalcZboxesReversed([]byte(p)), ContainsExactly, idiotZboxerReversed([]byte(p)))
     p = "aabcaaaabc"
-    c.Expect(stringz.PrecalcZboxesReversed(p), ContainsExactly, idiotZboxerReversed(p))
+    c.Expect(core.PrecalcZboxesReversed([]byte(p)), ContainsExactly, idiotZboxerReversed([]byte(p)))
     p = "aabcaaaabc*aabcaaaabc"
-    c.Expect(stringz.PrecalcZboxesReversed(p), ContainsExactly, idiotZboxerReversed(p))
+    c.Expect(core.PrecalcZboxesReversed([]byte(p)), ContainsExactly, idiotZboxerReversed([]byte(p)))
     p = "aabcaaaabc*aabcaaaabc*aabcaaaabc*aabcaaaabc*aabcaaaabc"
-    c.Expect(stringz.PrecalcZboxesReversed(p), ContainsExactly, idiotZboxerReversed(p))
+    c.Expect(core.PrecalcZboxesReversed([]byte(p)), ContainsExactly, idiotZboxerReversed([]byte(p)))
     p = "abcdefghijklmnopq"
-    c.Expect(stringz.PrecalcZboxesReversed(p), ContainsExactly, idiotZboxerReversed(p))
+    c.Expect(core.PrecalcZboxesReversed([]byte(p)), ContainsExactly, idiotZboxerReversed([]byte(p)))
     p = "abcdefghijklmnopqabcdefghijklmnopqabcdefghijklmnopq"
-    c.Expect(stringz.PrecalcZboxesReversed(p), ContainsExactly, idiotZboxerReversed(p))
+    c.Expect(core.PrecalcZboxesReversed([]byte(p)), ContainsExactly, idiotZboxerReversed([]byte(p)))
     p = "abcdefghijklmnopqabc efghijklmnopqab cdefghijklmnopq"
-    c.Expect(stringz.PrecalcZboxesReversed(p), ContainsExactly, idiotZboxerReversed(p))
+    c.Expect(core.PrecalcZboxesReversed([]byte(p)), ContainsExactly, idiotZboxerReversed([]byte(p)))
     p = "aaaaaaaaaaaaaaaaaa"
-    c.Expect(stringz.PrecalcZboxesReversed(p), ContainsExactly, idiotZboxerReversed(p))
+    c.Expect(core.PrecalcZboxesReversed([]byte(p)), ContainsExactly, idiotZboxerReversed([]byte(p)))
     p = "bbbbbbbbbbbaaaaaaaaaaaa"
-    c.Expect(stringz.PrecalcZboxesReversed(p), ContainsExactly, idiotZboxerReversed(p))
+    c.Expect(core.PrecalcZboxesReversed([]byte(p)), ContainsExactly, idiotZboxerReversed([]byte(p)))
     p = "bbbbbbbaaaaaaaaabbbbbbbbbbbbbbaaaabbbbbbbbbaaaaabbaaaaaaaaabbaa"
-    c.Expect(stringz.PrecalcZboxesReversed(p), ContainsExactly, idiotZboxerReversed(p))
+    c.Expect(core.PrecalcZboxesReversed([]byte(p)), ContainsExactly, idiotZboxerReversed([]byte(p)))
     p = "aabbaaa"
-    c.Expect(stringz.PrecalcZboxesReversed(p), ContainsExactly, idiotZboxerReversed(p))
+    c.Expect(core.PrecalcZboxesReversed([]byte(p)), ContainsExactly, idiotZboxerReversed([]byte(p)))
   })
 }
 
@@ -244,9 +240,10 @@ func BenchmarkBoyerMoore1_10_100000(b *testing.B) {
   b.StopTimer()
   p := makeTestString1(10, 0)
   t := makeTestString1(100000, 0)
+  bmd := core.BoyerMoorePreprocess(p)
   b.StartTimer()
   for i := 0; i < b.N; i++ {
-    stringz.BoyerMoore(p, t)
+    core.BoyerMoore(bmd, t)
   }
 }
 
@@ -254,9 +251,10 @@ func BenchmarkBoyerMoore1_100_100000(b *testing.B) {
   b.StopTimer()
   p := makeTestString1(100, 0)
   t := makeTestString1(100000, 0)
+  bmd := core.BoyerMoorePreprocess(p)
   b.StartTimer()
   for i := 0; i < b.N; i++ {
-    stringz.BoyerMoore(p, t)
+    core.BoyerMoore(bmd, t)
   }
 }
 
@@ -264,27 +262,25 @@ func BenchmarkBoyerMoore1_100_100000(b *testing.B) {
 // quadratic when search for something of the for abxb(ab)+ in (ab)+
 func BenchmarkBoyerMoore2_10_100000(b *testing.B) {
   b.StopTimer()
-  P := makeTestString3(10, 2)
-  pb := []byte(P)
-  pb[2] = 'x'
-  p := string(pb)
+  p := makeTestString3(10, 2)
+  p[2] = 'x'
   t := makeTestString3(100000, 2)
+  bmd := core.BoyerMoorePreprocess(p)
   b.StartTimer()
   for i := 0; i < b.N; i++ {
-    stringz.BoyerMoore(p, t)
+    core.BoyerMoore(bmd, t)
   }
 }
 
 func BenchmarkBoyerMoore2_100_100000(b *testing.B) {
   b.StopTimer()
-  P := makeTestString3(100, 2)
-  pb := []byte(P)
-  pb[2] = 'x'
-  p := string(pb)
+  p := makeTestString3(100, 2)
+  p[2] = 'x'
   t := makeTestString3(100000, 2)
+  bmd := core.BoyerMoorePreprocess(p)
   b.StartTimer()
   for i := 0; i < b.N; i++ {
-    stringz.BoyerMoore(p, t)
+    core.BoyerMoore(bmd, t)
   }
 }
 
@@ -295,9 +291,10 @@ func BenchmarkBoyerMoore3_10_100000(b *testing.B) {
   b.StopTimer()
   p := makeTestString1(10, 0)
   t := makeTestString1(100000, 1)
+  bmd := core.BoyerMoorePreprocess(p)
   b.StartTimer()
   for i := 0; i < b.N; i++ {
-    stringz.BoyerMoore(p, t)
+    core.BoyerMoore(bmd, t)
   }
 }
 
@@ -305,9 +302,10 @@ func BenchmarkBoyerMoore3_100_100000(b *testing.B) {
   b.StopTimer()
   p := makeTestString1(100, 0)
   t := makeTestString1(100000, 1)
+  bmd := core.BoyerMoorePreprocess(p)
   b.StartTimer()
   for i := 0; i < b.N; i++ {
-    stringz.BoyerMoore(p, t)
+    core.BoyerMoore(bmd, t)
   }
 }
 
@@ -317,9 +315,10 @@ func BenchmarkBoyerMoore4_10_100000(b *testing.B) {
   b.StopTimer()
   p := makeTestString4(10, 20, 0)
   t := makeTestString4(100000, 20, 1)
+  bmd := core.BoyerMoorePreprocess(p)
   b.StartTimer()
   for i := 0; i < b.N; i++ {
-    stringz.BoyerMoore(p, t)
+    core.BoyerMoore(bmd, t)
   }
 }
 
@@ -327,9 +326,10 @@ func BenchmarkBoyerMoore4_100_100000(b *testing.B) {
   b.StopTimer()
   p := makeTestString4(100, 20, 0)
   t := makeTestString4(100000, 20, 1)
+  bmd := core.BoyerMoorePreprocess(p)
   b.StartTimer()
   for i := 0; i < b.N; i++ {
-    stringz.BoyerMoore(p, t)
+    core.BoyerMoore(bmd, t)
   }
 }
 
@@ -339,9 +339,10 @@ func BenchmarkBoyerMoore5_10_100000(b *testing.B) {
   b.StopTimer()
   p := makeTestString4(10, 4, 0)
   t := makeTestString4(100000, 4, 1)
+  bmd := core.BoyerMoorePreprocess(p)
   b.StartTimer()
   for i := 0; i < b.N; i++ {
-    stringz.BoyerMoore(p, t)
+    core.BoyerMoore(bmd, t)
   }
 }
 
@@ -349,33 +350,31 @@ func BenchmarkBoyerMoore5_100_100000(b *testing.B) {
   b.StopTimer()
   p := makeTestString4(100, 4, 0)
   t := makeTestString4(100000, 4, 1)
+  bmd := core.BoyerMoorePreprocess(p)
   b.StartTimer()
   for i := 0; i < b.N; i++ {
-    stringz.BoyerMoore(p, t)
+    core.BoyerMoore(bmd, t)
   }
 }
 
 func LongestSuffixAsPrefixSpec(c gospec.Context) {
   fmt.Printf("")
   c.Specify("Comprehensive test 2^15", func() {
-    b := make([]byte, 15)
-    for augment(b, 2) {
-      p := string(b)
-      c.Expect(stringz.LongestSuffixAsPrefix(p), ContainsExactly, idiotLongestSuffixAsPrefix(p))
+    p := make([]byte, 15)
+    for augment(p, 2) {
+      c.Expect(core.LongestSuffixAsPrefix(p), ContainsExactly, idiotLongestSuffixAsPrefix(p))
     }
   })
   c.Specify("Comprehensive test 3^9", func() {
-    b := make([]byte, 9)
-    for augment(b, 3) {
-      p := string(b)
-      c.Expect(stringz.LongestSuffixAsPrefix(p), ContainsExactly, idiotLongestSuffixAsPrefix(p))
+    p := make([]byte, 9)
+    for augment(p, 3) {
+      c.Expect(core.LongestSuffixAsPrefix(p), ContainsExactly, idiotLongestSuffixAsPrefix(p))
     }
   })
   c.Specify("Comprehensive test 4^7", func() {
-    b := make([]byte, 7)
-    for augment(b, 4) {
-      p := string(b)
-      c.Expect(stringz.LongestSuffixAsPrefix(p), ContainsExactly, idiotLongestSuffixAsPrefix(p))
+    p := make([]byte, 7)
+    for augment(p, 4) {
+      c.Expect(core.LongestSuffixAsPrefix(p), ContainsExactly, idiotLongestSuffixAsPrefix(p))
     }
   })
 }
@@ -384,18 +383,20 @@ func BoyerMooreSpec(c gospec.Context) {
   c.Specify("Comprehensive test 2^17", func() {
     b := make([]byte, 17)
     for augment(b, 2) {
-      p := string(b[0:5])
-      t := string(b[5:])
-      c.Expect(stringz.BoyerMoore(p, t), ContainsExactly, idiotStringSearch(p, t))
+      p := b[0:5]
+      t := b[5:]
+      bmd := core.BoyerMoorePreprocess(p)
+      c.Expect(core.BoyerMoore(bmd, t), ContainsExactly, idiotStringSearch(p, t))
     }
   })
 
   c.Specify("Comprehensive test 3^11", func() {
     b := make([]byte, 11)
     for augment(b, 3) {
-      p := string(b[0:4])
-      t := string(b[4:])
-      c.Expect(stringz.BoyerMoore(p, t), ContainsExactly, idiotStringSearch(p, t))
+      p := b[0:4]
+      t := b[4:]
+      bmd := core.BoyerMoorePreprocess(p)
+      c.Expect(core.BoyerMoore(bmd, t), ContainsExactly, idiotStringSearch(p, t))
     }
   })
 
@@ -403,7 +404,8 @@ func BoyerMooreSpec(c gospec.Context) {
     for i := 0; i < 10000; i += 2 {
       p := makeTestString4(15, 7, i)
       t := makeTestString4(1000, 7, i+1)
-      c.Expect(stringz.BoyerMoore(p, t), ContainsExactly, idiotStringSearch(p, t))
+      bmd := core.BoyerMoorePreprocess(p)
+      c.Expect(core.BoyerMoore(bmd, t), ContainsExactly, idiotStringSearch(p, t))
     }
   })
 }

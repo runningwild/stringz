@@ -1,16 +1,16 @@
-package stringz_test
+package core_test
 
 import (
   . "github.com/orfjackal/gospec/src/gospec"
   "github.com/orfjackal/gospec/src/gospec"
-  "github.com/runningwild/stringz"
+  "github.com/runningwild/stringz/core"
   "testing"
 )
 
 func idiotAhoCorasick(ps [][]byte, t []byte) [][]int {
   var res [][]int
   for i := range ps {
-    res = append(res, idiotStringSearch(string(ps[i]), string(t)))
+    res = append(res, idiotStringSearch(ps[i], t))
   }
   return res
 }
@@ -22,7 +22,7 @@ func AhoCorasickSpec(c gospec.Context) {
       []byte("anba"),
       []byte("banana"),
     }
-    res := stringz.AhoCorasick(strs, []byte("baababanananba"))
+    res := core.AhoCorasick(strs, []byte("baababanananba"))
     c.Expect(res[0], ContainsExactly, []int{0})
     c.Expect(res[1], ContainsExactly, []int{10})
     c.Expect(res[2], ContainsExactly, []int{5})
@@ -35,7 +35,7 @@ func AhoCorasickSpec(c gospec.Context) {
       []byte("aaa"),
       []byte("aa"),
     }
-    res := stringz.AhoCorasick(strs, []byte("abbaababbbbaaaaaabbbbaabaabaabbb"))
+    res := core.AhoCorasick(strs, []byte("abbaababbbbaaaaaabbbbaabaabaabbb"))
     c.Expect(res[0], ContainsExactly, []int{2, 10, 20, 23, 26})
     c.Expect(res[1], ContainsExactly, []int{3, 15, 21, 24, 27})
     c.Expect(res[2], ContainsExactly, []int{11, 12, 13, 14})
@@ -52,7 +52,7 @@ func AhoCorasickSpec(c gospec.Context) {
     }
     t := make([]byte, 12)
     for augment(t, 2) {
-      acres := stringz.AhoCorasick(ps, t)
+      acres := core.AhoCorasick(ps, t)
       ires := idiotAhoCorasick(ps, t)
       for i := range ps {
         c.Expect(acres[i], ContainsExactly, ires[i])
@@ -70,7 +70,7 @@ func AhoCorasickSpec(c gospec.Context) {
     }
     t := make([]byte, 8)
     for augment(t, 3) {
-      acres := stringz.AhoCorasick(ps, t)
+      acres := core.AhoCorasick(ps, t)
       ires := idiotAhoCorasick(ps, t)
       for i := range ps {
         c.Expect(acres[i], ContainsExactly, ires[i])
@@ -93,7 +93,7 @@ func AhoCorasickSpec(c gospec.Context) {
     }
     for seed := 10; seed < 30; seed++ {
       t := []byte(makeTestString4(10000, 11, seed))
-      acres := stringz.AhoCorasick(ps, t)
+      acres := core.AhoCorasick(ps, t)
       ires := idiotAhoCorasick(ps, t)
       for i := range ps {
         c.Expect(acres[i], ContainsExactly, ires[i])
@@ -119,7 +119,7 @@ func BenchmarkAhoCorasick4_10x10_100000(b *testing.B) {
   t := []byte(makeTestString4(100000, 10, 10))
   b.StartTimer()
   for i := 0; i < b.N; i++ {
-    stringz.AhoCorasick(ps, t)
+    core.AhoCorasick(ps, t)
   }
 }
 
@@ -132,7 +132,7 @@ func BenchmarkAhoCorasick4_100x10_100000(b *testing.B) {
   t := []byte(makeTestString4(100000, 10, len(ps)))
   b.StartTimer()
   for i := 0; i < b.N; i++ {
-    stringz.AhoCorasick(ps, t)
+    core.AhoCorasick(ps, t)
   }
 }
 
@@ -153,7 +153,6 @@ func BenchmarkAhoCorasick4_10x10_1000000(b *testing.B) {
   t := []byte(makeTestString4(1000000, 10, 10))
   b.StartTimer()
   for i := 0; i < b.N; i++ {
-    stringz.AhoCorasick(ps, t)
+    core.AhoCorasick(ps, t)
   }
 }
-

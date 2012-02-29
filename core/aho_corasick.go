@@ -1,4 +1,4 @@
-package stringz
+package core
 
 type acNode struct {
   // Index into the acNodeArray for a given character
