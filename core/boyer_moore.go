@@ -227,7 +227,7 @@ func BoyerMooreStrongGoodSuffixRule(p []byte) (L, l []int) {
   return
 }
 
-type bmData struct {
+type BmData struct {
   // Copy of the pattern
   p []byte
 
@@ -238,8 +238,8 @@ type bmData struct {
   R [][]int
 }
 
-func BoyerMoorePreprocess(p []byte) bmData {
-  var bmd bmData
+func BoyerMoorePreprocess(p []byte) BmData {
+  var bmd BmData
   bmd.p = make([]byte, len(p))
   copy(bmd.p, p)
   bmd.L, bmd.l = BoyerMooreStrongGoodSuffixRule(p)
@@ -251,7 +251,7 @@ func BoyerMoorePreprocess(p []byte) bmData {
 // A detail was left out of Gusfield - in certain shifts we might know that a
 // prefix of the current alignment matches, we need to keep track of that to
 // avoid quadratic runtime.
-func BoyerMoore(bmd bmData, t []byte) []int {
+func BoyerMoore(bmd BmData, t []byte) []int {
   var matches []int
   k := len(bmd.L) - 1
 
