@@ -22,7 +22,8 @@ func AhoCorasickSpec(c gospec.Context) {
       []byte("anba"),
       []byte("banana"),
     }
-    res := core.AhoCorasick(strs, []byte("baababanananba"))
+    acd := core.AhoCorasickPreprocess(strs)
+    res := core.AhoCorasick(acd, []byte("baababanananba"))
     c.Expect(res[0], ContainsExactly, []int{0})
     c.Expect(res[1], ContainsExactly, []int{10})
     c.Expect(res[2], ContainsExactly, []int{5})
@@ -35,7 +36,8 @@ func AhoCorasickSpec(c gospec.Context) {
       []byte("aaa"),
       []byte("aa"),
     }
-    res := core.AhoCorasick(strs, []byte("abbaababbbbaaaaaabbbbaabaabaabbb"))
+    acd := core.AhoCorasickPreprocess(strs)
+    res := core.AhoCorasick(acd, []byte("abbaababbbbaaaaaabbbbaabaabaabbb"))
     c.Expect(res[0], ContainsExactly, []int{2, 10, 20, 23, 26})
     c.Expect(res[1], ContainsExactly, []int{3, 15, 21, 24, 27})
     c.Expect(res[2], ContainsExactly, []int{11, 12, 13, 14})
@@ -52,7 +54,8 @@ func AhoCorasickSpec(c gospec.Context) {
     }
     t := make([]byte, 12)
     for augment(t, 2) {
-      acres := core.AhoCorasick(ps, t)
+      acd := core.AhoCorasickPreprocess(ps)
+      acres := core.AhoCorasick(acd, t)
       ires := idiotAhoCorasick(ps, t)
       for i := range ps {
         c.Expect(acres[i], ContainsExactly, ires[i])
@@ -70,7 +73,8 @@ func AhoCorasickSpec(c gospec.Context) {
     }
     t := make([]byte, 8)
     for augment(t, 3) {
-      acres := core.AhoCorasick(ps, t)
+      acd := core.AhoCorasickPreprocess(ps)
+      acres := core.AhoCorasick(acd, t)
       ires := idiotAhoCorasick(ps, t)
       for i := range ps {
         c.Expect(acres[i], ContainsExactly, ires[i])
@@ -93,7 +97,8 @@ func AhoCorasickSpec(c gospec.Context) {
     }
     for seed := 10; seed < 30; seed++ {
       t := []byte(makeTestString4(10000, 11, seed))
-      acres := core.AhoCorasick(ps, t)
+      acd := core.AhoCorasickPreprocess(ps)
+      acres := core.AhoCorasick(acd, t)
       ires := idiotAhoCorasick(ps, t)
       for i := range ps {
         c.Expect(acres[i], ContainsExactly, ires[i])
@@ -117,9 +122,10 @@ func BenchmarkAhoCorasick4_10x10_100000(b *testing.B) {
     []byte(makeTestString4(5, 10, 9)),
   }
   t := []byte(makeTestString4(100000, 10, 10))
+  acd := core.AhoCorasickPreprocess(ps)
   b.StartTimer()
   for i := 0; i < b.N; i++ {
-    core.AhoCorasick(ps, t)
+    core.AhoCorasick(acd, t)
   }
 }
 
@@ -130,9 +136,10 @@ func BenchmarkAhoCorasick4_100x10_100000(b *testing.B) {
     ps[i] = []byte(makeTestString4(5, 10, i))
   }
   t := []byte(makeTestString4(100000, 10, len(ps)))
+  acd := core.AhoCorasickPreprocess(ps)
   b.StartTimer()
   for i := 0; i < b.N; i++ {
-    core.AhoCorasick(ps, t)
+    core.AhoCorasick(acd, t)
   }
 }
 
@@ -151,8 +158,9 @@ func BenchmarkAhoCorasick4_10x10_1000000(b *testing.B) {
     []byte(makeTestString4(5, 10, 9)),
   }
   t := []byte(makeTestString4(1000000, 10, 10))
+  acd := core.AhoCorasickPreprocess(ps)
   b.StartTimer()
   for i := 0; i < b.N; i++ {
-    core.AhoCorasick(ps, t)
+    core.AhoCorasick(acd, t)
   }
 }

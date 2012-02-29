@@ -1,7 +1,7 @@
 package core
 
-type acNode struct {
-  // Index into the acNodeArray for a given character
+type AcNode struct {
+  // Index into the AcNodeArray for a given character
   next [256]int
 
   // failure link index
@@ -15,24 +15,38 @@ type ahBfs struct {
   node, data, index int
 }
 
-func AhoCorasickPreprocessSet(datas [][]byte) []acNode {
+type AcData struct {
+  // Lengths of the patterns
+  Lengths []int
+
+  // The graph
+  Nodes []AcNode
+}
+
+func AhoCorasickPreprocess(datas [][]byte) AcData {
+  var acd AcData
+  acd.Lengths = make([]int, len(datas))
+  for i := range acd.Lengths {
+    acd.Lengths[i] = len(datas[i])
+  }
+
   total_len := 0
   for i := range datas {
     total_len += len(datas[i])
   }
-  nodes := make([]acNode, total_len + 1)[0:1]
+  acd.Nodes = make([]AcNode, total_len + 1)[0:1]
   for i,data := range datas {
     cur := 0
     for _,b := range data {
-      if nodes[cur].next[b] != 0 {
-        cur = nodes[cur].next[b]
+      if acd.Nodes[cur].next[b] != 0 {
+        cur = acd.Nodes[cur].next[b]
         continue
       }
-      nodes[cur].next[b] = len(nodes)
-      cur = len(nodes)
-      nodes = append(nodes, acNode{})
+      acd.Nodes[cur].next[b] = len(acd.Nodes)
+      cur = len(acd.Nodes)
+      acd.Nodes = append(acd.Nodes, AcNode{})
     }
-    nodes[cur].matches = append(nodes[cur].matches, i)
+    acd.Nodes[cur].matches = append(acd.Nodes[cur].matches, i)
   }
 
   // The skeleton of the graph is done, now we do a BFS on the nodes and form
@@ -43,7 +57,7 @@ func AhoCorasickPreprocessSet(datas [][]byte) []acNode {
     // works instead?
     if len(datas[i]) > 1 {
       bfs := ahBfs{
-        node:  nodes[0].next[datas[i][0]],
+        node:  acd.Nodes[0].next[datas[i][0]],
         data:  i,
         index: 1,
       }
@@ -53,49 +67,48 @@ func AhoCorasickPreprocessSet(datas [][]byte) []acNode {
   for len(q) > 0 {
     bfs := q[0]
     q = q[1:]
-    mod := nodes[bfs.node].failure
+    mod := acd.Nodes[bfs.node].failure
     edge := datas[bfs.data][bfs.index]
-    for mod != 0 && nodes[mod].next[edge] == 0 {
-      mod = nodes[mod].failure
+    for mod != 0 && acd.Nodes[mod].next[edge] == 0 {
+      mod = acd.Nodes[mod].failure
     }
-    source := nodes[bfs.node].next[edge]
-    if nodes[source].failure == 0 {
-      target := nodes[mod].next[edge]
-      nodes[source].failure = target
-      for _, m := range nodes[target].matches {
-        nodes[source].matches = append(nodes[source].matches, m)
+    source := acd.Nodes[bfs.node].next[edge]
+    if acd.Nodes[source].failure == 0 {
+      target := acd.Nodes[mod].next[edge]
+      acd.Nodes[source].failure = target
+      for _, m := range acd.Nodes[target].matches {
+        acd.Nodes[source].matches = append(acd.Nodes[source].matches, m)
       }
     }
-    bfs.node = nodes[bfs.node].next[edge]
+    bfs.node = acd.Nodes[bfs.node].next[edge]
     bfs.index++
     if bfs.index < len(datas[bfs.data]) {
       q = append(q, bfs)
     }
   }
 
-  return nodes
+  return acd
 }
 
-func AhoCorasick(datas [][]byte, t []byte) [][]int {
-  nodes := AhoCorasickPreprocessSet(datas)
+func AhoCorasick(acd AcData, t []byte) [][]int {
   cur := 0
-  matches := make([][]int, len(datas))
+  matches := make([][]int, len(acd.Lengths))
   for i, c := range t {
-    for _, m := range nodes[cur].matches {
-      matches[m] = append(matches[m], i - len(datas[m]))
+    for _, m := range acd.Nodes[cur].matches {
+      matches[m] = append(matches[m], i - acd.Lengths[m])
     }
-    for nodes[cur].next[c] == 0 {
-      if nodes[cur].failure != 0 {
-        cur = nodes[cur].failure
+    for acd.Nodes[cur].next[c] == 0 {
+      if acd.Nodes[cur].failure != 0 {
+        cur = acd.Nodes[cur].failure
       } else {
         cur = 0
         break
       }
     }
-    cur = nodes[cur].next[c]
+    cur = acd.Nodes[cur].next[c]
   }
-  for _, m := range nodes[cur].matches {
-    matches[m] = append(matches[m], len(t) - len(datas[m]))
+  for _, m := range acd.Nodes[cur].matches {
+    matches[m] = append(matches[m], len(t) - acd.Lengths[m])
   }
   return matches
 }
