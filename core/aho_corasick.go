@@ -34,10 +34,10 @@ func AhoCorasickPreprocess(datas [][]byte) AcData {
   for i := range datas {
     total_len += len(datas[i])
   }
-  acd.Nodes = make([]AcNode, total_len + 1)[0:1]
-  for i,data := range datas {
+  acd.Nodes = make([]AcNode, total_len+1)[0:1]
+  for i, data := range datas {
     cur := 0
-    for _,b := range data {
+    for _, b := range data {
       if acd.Nodes[cur].next[b] != 0 {
         cur = acd.Nodes[cur].next[b]
         continue
@@ -95,7 +95,7 @@ func AhoCorasick(acd AcData, t []byte) [][]int {
   matches := make([][]int, len(acd.Lengths))
   for i, c := range t {
     for _, m := range acd.Nodes[cur].matches {
-      matches[m] = append(matches[m], i - acd.Lengths[m])
+      matches[m] = append(matches[m], i-acd.Lengths[m])
     }
     for acd.Nodes[cur].next[c] == 0 {
       if acd.Nodes[cur].failure != 0 {
@@ -108,7 +108,7 @@ func AhoCorasick(acd AcData, t []byte) [][]int {
     cur = acd.Nodes[cur].next[c]
   }
   for _, m := range acd.Nodes[cur].matches {
-    matches[m] = append(matches[m], len(t) - acd.Lengths[m])
+    matches[m] = append(matches[m], len(t)-acd.Lengths[m])
   }
   return matches
 }
