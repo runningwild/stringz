@@ -193,10 +193,10 @@ func PrecalcZboxesReversed(p []byte) []int {
   return zs
 }
 
-// Requires knowledge of the alphabet size so that we avoid doin hashtable
+// Requires knowledge of the alphabet size so that we avoid doing hashtable
 // lookups.
-func boyerMooreExtendedBadCharacterRule(p []byte, alpha_size int) [][]int {
-  m := make([][]int, alpha_size)
+func boyerMooreExtendedBadCharacterRule(p []byte) [256][]int {
+  var m [256][]int
   for i := len(p) - 1; i >= 0; i-- {
     r := p[i]
     m[r] = append(m[r], i)
@@ -233,7 +233,7 @@ type BmData struct {
   L, l []int
 
   // Output from boyerMooreExtendedBadCharacterRule
-  R [][]int
+  R [256][]int
 }
 
 func BoyerMoorePreprocess(p []byte) BmData {
@@ -241,7 +241,7 @@ func BoyerMoorePreprocess(p []byte) BmData {
   bmd.p = make([]byte, len(p))
   copy(bmd.p, p)
   bmd.L, bmd.l = BoyerMooreStrongGoodSuffixRule(p)
-  bmd.R = boyerMooreExtendedBadCharacterRule(p, 256)
+  bmd.R = boyerMooreExtendedBadCharacterRule(p)
   return bmd
 }
 
