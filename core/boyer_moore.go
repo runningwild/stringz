@@ -1,7 +1,5 @@
 package core
 
-// import "fmt"
-
 func PrecalcZboxes(p []byte) []int {
   if len(p) == 0 {
     return nil
@@ -271,10 +269,15 @@ func BoyerMoore(bmd BmData, t []byte) []int {
     if i < min {
       // found a match
       matches = append(matches, k-len(bmd.L)+1)
-      k += bmd.l[0]
+      if bmd.l[0] > 0 {
+        k += bmd.l[0]
 
-      // Since we matched we will know some prefix of the next alignment.
-      min = len(bmd.L) - bmd.l[0]
+        // Since we matched we will know some prefix of the next alignment.
+        min = len(bmd.L) - bmd.l[0]
+      } else {
+        k++
+        min = 0
+      }
     } else {
       shift := 0
 

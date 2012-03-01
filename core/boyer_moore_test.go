@@ -380,6 +380,33 @@ func LongestSuffixAsPrefixSpec(c gospec.Context) {
 }
 
 func BoyerMooreSpec(c gospec.Context) {
+  c.Specify("Basic test", func() {
+    p := []byte("a")
+    t := []byte("aaaaaaaaaa")
+    c.Expect(core.BoyerMoore(core.BoyerMoorePreprocess(p), t), ContainsExactly, idiotStringSearch(p, t))
+    p = []byte("aa")
+    t = []byte("aaaaaaaaaa")
+    c.Expect(core.BoyerMoore(core.BoyerMoorePreprocess(p), t), ContainsExactly, idiotStringSearch(p, t))
+    p = []byte("aaaaaaaaaa")
+    t = []byte("aaaaaaaaaa")
+    c.Expect(core.BoyerMoore(core.BoyerMoorePreprocess(p), t), ContainsExactly, idiotStringSearch(p, t))
+    p = []byte("aaaaaaaaaaaaaaaaaaaaa")
+    t = []byte("aaaaaaaaaa")
+    c.Expect(core.BoyerMoore(core.BoyerMoorePreprocess(p), t), ContainsExactly, idiotStringSearch(p, t))
+    p = []byte("b")
+    t = []byte("aaaabaaaaa")
+    c.Expect(core.BoyerMoore(core.BoyerMoorePreprocess(p), t), ContainsExactly, idiotStringSearch(p, t))
+    p = []byte("ba")
+    t = []byte("aaaabaaaaa")
+    c.Expect(core.BoyerMoore(core.BoyerMoorePreprocess(p), t), ContainsExactly, idiotStringSearch(p, t))
+    p = []byte("aaaabaaaaa")
+    t = []byte("aaaabaaaaa")
+    c.Expect(core.BoyerMoore(core.BoyerMoorePreprocess(p), t), ContainsExactly, idiotStringSearch(p, t))
+    p = []byte("aaaaaaaaaaaaaaaaabaaa")
+    t = []byte("aaaaaabaaa")
+    c.Expect(core.BoyerMoore(core.BoyerMoorePreprocess(p), t), ContainsExactly, idiotStringSearch(p, t))
+  })
+
   c.Specify("Comprehensive test 2^17", func() {
     b := make([]byte, 17)
     for augment(b, 2) {
