@@ -1,5 +1,10 @@
 package core
 
+import (
+  "bytes"
+  "io"
+)
+
 type AcNode struct {
   // Index into the AcNodeArray for a given character
   next [256]int
@@ -91,24 +96,34 @@ func AhoCorasickPreprocess(datas [][]byte) AcData {
 }
 
 func AhoCorasick(acd AcData, t []byte) [][]int {
+  return AhoCorasickFromReader(acd, bytes.NewBuffer(t), 2048)
+}
+
+func AhoCorasickFromReader(acd AcData, in io.Reader, buf_size int) [][]int {
   cur := 0
   matches := make([][]int, len(acd.Lengths))
-  for i, c := range t {
-    for _, m := range acd.Nodes[cur].matches {
-      matches[m] = append(matches[m], i-acd.Lengths[m])
-    }
-    for acd.Nodes[cur].next[c] == 0 {
-      if acd.Nodes[cur].failure != 0 {
-        cur = acd.Nodes[cur].failure
-      } else {
-        cur = 0
-        break
+  buf := make([]byte, buf_size)
+  read := 0
+  for n, err := in.Read(buf); err == nil; n, err = in.Read(buf) {
+    t := buf[0:n]
+    for i, c := range t {
+      for _, m := range acd.Nodes[cur].matches {
+        matches[m] = append(matches[m], i-acd.Lengths[m]+read)
       }
+      for acd.Nodes[cur].next[c] == 0 {
+        if acd.Nodes[cur].failure != 0 {
+          cur = acd.Nodes[cur].failure
+        } else {
+          cur = 0
+          break
+        }
+      }
+      cur = acd.Nodes[cur].next[c]
     }
-    cur = acd.Nodes[cur].next[c]
+    read += n
   }
   for _, m := range acd.Nodes[cur].matches {
-    matches[m] = append(matches[m], len(t)-acd.Lengths[m])
+    matches[m] = append(matches[m], read-acd.Lengths[m])
   }
   return matches
 }

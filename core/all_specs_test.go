@@ -14,6 +14,7 @@ func TestAllSpecs(t *testing.T) {
   r.AddSpec(LongestSuffixAsPrefixSpec)
   r.AddSpec(BoyerMooreSpec)
   r.AddSpec(AhoCorasickSpec)
+  r.AddSpec(AhoCorasickReaderSpec)
   gospec.MainGoTest(r, t)
 }
 

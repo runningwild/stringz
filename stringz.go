@@ -10,8 +10,8 @@ package stringz
 
 import (
   "github.com/runningwild/stringz/core"
+  "io"
 )
-
 
 type StringFinder struct {
   bmd core.BmData
@@ -20,6 +20,8 @@ type StringFinder struct {
 // Preprocesses p and returns a *StringFinder that can be used to quickly
 // search for occurrences of p in other strings.  Uses Boyer-Moore, which
 // requires O(n) time to preprocess p, and O(n) space to store the result.
+// Methods on StringFinder can be called concurrently from multiple
+// go-routines.
 func Find(p []byte) *StringFinder {
   return &StringFinder{bmd: core.BoyerMoorePreprocess(p)}
 }
@@ -34,7 +36,6 @@ func (sf *StringFinder) In(t []byte) []int {
   return core.BoyerMoore(sf.bmd, t)
 }
 
-
 type StringSetFinder struct {
   acd core.AcData
 }
@@ -43,6 +44,8 @@ type StringSetFinder struct {
 // search for all occurrences of all elements of ps in other strings.  Uses
 // Aho-Corasick, which requires O(n) time to preprocess ps, and O(n) to store
 // the result, where n is the sum of the lengths of all of the elements in ps.
+// Methods on StringSetFinder can be called concurrently from multiple
+// go-routines.
 func FindSet(ps [][]byte) *StringSetFinder {
   return &StringSetFinder{acd: core.AhoCorasickPreprocess(ps)}
 }
@@ -55,4 +58,9 @@ func FindSet(ps [][]byte) *StringSetFinder {
 // in t.
 func (ssf *StringSetFinder) In(t []byte) [][]int {
   return core.AhoCorasick(ssf.acd, t)
+}
+
+// Like In(), but searches the data from a Reader instead of a []byte.
+func (sf *StringSetFinder) InReader(input io.Reader) [][]int {
+  return core.AhoCorasickFromReader(sf.acd, input, 2048)
 }
