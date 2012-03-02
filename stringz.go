@@ -53,9 +53,9 @@ func FindSet(ps [][]byte) *StringSetFinder {
 // Searches t for all patterns in the set of patterns, ps, that was used to
 // create the StringSetFinder.  Returns a list, H, such that H[i] is a list of
 // every index in t at which ps[i] occurs.  Each H[i] includes overlaps and is
-// in ascending order.  The search takes O(m) and O(k) space, where m is the
-// length of t, and k is the total number of occurrences of all elements of ps
-// in t.
+// in ascending order.  The search takes O(m) time and O(k) space, where m is
+// the length of t, and k is the total number of occurrences of all elements
+// of ps in t.
 func (ssf *StringSetFinder) In(t []byte) [][]int {
   return core.AhoCorasick(ssf.acd, t)
 }

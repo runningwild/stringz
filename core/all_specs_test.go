@@ -9,12 +9,13 @@ import (
 // List of all specs here
 func TestAllSpecs(t *testing.T) {
   r := gospec.NewRunner()
-  r.AddSpec(ZBoxSpec)
-  r.AddSpec(ZBoxReverseSpec)
-  r.AddSpec(LongestSuffixAsPrefixSpec)
-  r.AddSpec(BoyerMooreSpec)
-  r.AddSpec(AhoCorasickSpec)
-  r.AddSpec(AhoCorasickReaderSpec)
+  // r.AddSpec(ZBoxSpec)
+  // r.AddSpec(ZBoxReverseSpec)
+  // r.AddSpec(LongestSuffixAsPrefixSpec)
+  // r.AddSpec(BoyerMooreSpec)
+  r.AddSpec(BoyerMooreReaderSpec)
+  // r.AddSpec(AhoCorasickSpec)
+  // r.AddSpec(AhoCorasickReaderSpec)
   gospec.MainGoTest(r, t)
 }
 

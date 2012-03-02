@@ -2,6 +2,7 @@ package core_test
 
 import (
   "fmt"
+  "bytes"
   . "github.com/orfjackal/gospec/src/gospec"
   "github.com/orfjackal/gospec/src/gospec"
   "github.com/runningwild/stringz/core"
@@ -433,6 +434,90 @@ func BoyerMooreSpec(c gospec.Context) {
       t := makeTestString4(1000, 7, i+1)
       bmd := core.BoyerMoorePreprocess(p)
       c.Expect(core.BoyerMoore(bmd, t), ContainsExactly, idiotStringSearch(p, t))
+    }
+  })
+}
+
+func BoyerMooreReaderSpec(c gospec.Context) {
+  c.Specify("Basic test", func() {
+    p := []byte("a")
+    t := []byte("aaaaaaaaa")
+    bmd := core.BoyerMoorePreprocess(p)
+    res := core.BoyerMooreFromReader(bmd, bytes.NewBuffer(t), 1)
+    c.Expect(res, ContainsExactly, idiotStringSearch(p, t))
+    p = []byte("aa")
+    t = []byte("aaaaaaaaaa")
+    core.BoyerMoorePreprocess(p)
+    bmd = core.BoyerMoorePreprocess(p)
+    res = core.BoyerMooreFromReader(bmd, bytes.NewBuffer(t), 1)
+    c.Expect(res, ContainsExactly, idiotStringSearch(p, t))
+    p = []byte("aaaaaaaaaa")
+    t = []byte("aaaaaaaaaa")
+    core.BoyerMoorePreprocess(p)
+    bmd = core.BoyerMoorePreprocess(p)
+    res = core.BoyerMooreFromReader(bmd, bytes.NewBuffer(t), 1)
+    c.Expect(res, ContainsExactly, idiotStringSearch(p, t))
+    p = []byte("aaaaaaaaaaaaaaaaaaaaa")
+    t = []byte("aaaaaaaaaa")
+    core.BoyerMoorePreprocess(p)
+    bmd = core.BoyerMoorePreprocess(p)
+    res = core.BoyerMooreFromReader(bmd, bytes.NewBuffer(t), 1)
+    c.Expect(res, ContainsExactly, idiotStringSearch(p, t))
+    p = []byte("b")
+    t = []byte("aaaabaaaaa")
+    core.BoyerMoorePreprocess(p)
+    bmd = core.BoyerMoorePreprocess(p)
+    res = core.BoyerMooreFromReader(bmd, bytes.NewBuffer(t), 1)
+    c.Expect(res, ContainsExactly, idiotStringSearch(p, t))
+    p = []byte("ba")
+    t = []byte("aaaabaaaaa")
+    core.BoyerMoorePreprocess(p)
+    bmd = core.BoyerMoorePreprocess(p)
+    res = core.BoyerMooreFromReader(bmd, bytes.NewBuffer(t), 1)
+    c.Expect(res, ContainsExactly, idiotStringSearch(p, t))
+    p = []byte("aaaabaaaaa")
+    t = []byte("aaaabaaaaa")
+    core.BoyerMoorePreprocess(p)
+    bmd = core.BoyerMoorePreprocess(p)
+    res = core.BoyerMooreFromReader(bmd, bytes.NewBuffer(t), 1)
+    c.Expect(res, ContainsExactly, idiotStringSearch(p, t))
+    p = []byte("aaaaaaaaaaaaaaaaabaaa")
+    t = []byte("aaaaaabaaa")
+    core.BoyerMoorePreprocess(p)
+    bmd = core.BoyerMoorePreprocess(p)
+    res = core.BoyerMooreFromReader(bmd, bytes.NewBuffer(t), 1)
+    c.Expect(res, ContainsExactly, idiotStringSearch(p, t))
+  })
+
+  c.Specify("Comprehensive test 2^17", func() {
+    b := make([]byte, 17)
+    for augment(b, 2) {
+      p := b[0:5]
+      t := b[5:]
+      bmd := core.BoyerMoorePreprocess(p)
+      res := core.BoyerMooreFromReader(bmd, bytes.NewBuffer(t), 1)
+      c.Expect(res, ContainsExactly, idiotStringSearch(p, t))
+    }
+  })
+
+  c.Specify("Comprehensive test 3^11", func() {
+    b := make([]byte, 11)
+    for augment(b, 3) {
+      p := b[0:4]
+      t := b[4:]
+      bmd := core.BoyerMoorePreprocess(p)
+      res := core.BoyerMooreFromReader(bmd, bytes.NewBuffer(t), 1)
+      c.Expect(res, ContainsExactly, idiotStringSearch(p, t))
+    }
+  })
+
+  c.Specify("Random test", func() {
+    for i := 0; i < 10000; i += 2 {
+      p := makeTestString4(15, 7, i)
+      t := makeTestString4(1000, 7, i+1)
+      bmd := core.BoyerMoorePreprocess(p)
+      res := core.BoyerMooreFromReader(bmd, bytes.NewBuffer(t), 1)
+      c.Expect(res, ContainsExactly, idiotStringSearch(p, t))
     }
   })
 }
