@@ -1,7 +1,6 @@
 package core
 
 import (
-  "bytes"
   "io"
 )
 
@@ -251,7 +250,75 @@ func BoyerMoorePreprocess(p []byte) BmData {
 }
 
 func BoyerMoore(bmd BmData, t []byte) []int {
-  return BoyerMooreFromReader(bmd, bytes.NewBuffer(t), len(t))
+  var matches []int
+  k := len(bmd.L) - 1
+
+  // In some cases we don't need to go all the way to the left-most character
+  // since we might know that a certain prefix of the current alignment
+  // matches based on a previous test.
+  min := 0
+
+  for k < len(t) {
+    i := len(bmd.L) - 1
+    h := k
+    for i >= min && bmd.p[i] == t[h] {
+      i--
+      h--
+    }
+
+    if i < min {
+      // found a match
+      matches = append(matches, k-len(bmd.L)+1)
+      if bmd.l[0] > 0 {
+        k += bmd.l[0]
+
+        // Since we matched we will know some prefix of the next alignment.
+        min = len(bmd.L) - bmd.l[0]
+      } else {
+        k++
+        min = 0
+      }
+    } else {
+      shift := 0
+
+      // Strong good suffix rule
+      if bmd.L[i] == 0 {
+        shift = bmd.l[i]
+
+        // This shift can place part of what already matched as a prefix.
+        min = len(bmd.L) - bmd.l[i]
+      } else {
+        shift = bmd.L[i]
+        min = 0
+      }
+
+      // Extended bad character rule
+      bc := bmd.R[t[h]]
+      if len(bc) == 0 {
+        shift = i + 1
+        min = 0
+      } else {
+        for j := range bc {
+          if bc[j] < i {
+            if i-bc[j] > shift {
+              shift = i - bc[j]
+              min = 0
+            }
+            break
+          }
+        }
+      }
+
+      // Must always shift by at least one
+      if shift == 0 {
+        shift = 1
+        min = 0
+      }
+
+      k += shift
+    }
+  }
+  return matches
 }
 
 // Implementation of the Boyer-Moore string search, as detailed in Gusfield.
@@ -287,11 +354,12 @@ func BoyerMooreFromReader(bmd BmData, in io.Reader, buf_size int) []int {
       if i < min {
         // found a match
         matches = append(matches, k-len(bmd.L)+1+read)
-        if bmd.l[0] > 0 {
-          k += bmd.l[0]
+        l0 := bmd.l[0]
+        if l0 > 0 {
+          k += l0
 
           // Since we matched we will know some prefix of the next alignment.
-          min = len(bmd.L) - bmd.l[0]
+          min = len(bmd.L) - l0
         } else {
           k++
           min = 0
@@ -300,13 +368,14 @@ func BoyerMooreFromReader(bmd BmData, in io.Reader, buf_size int) []int {
         shift := 0
 
         // Strong good suffix rule
-        if bmd.L[i] == 0 {
+        Li := bmd.L[i]
+        if Li == 0 {
           shift = bmd.l[i]
 
           // This shift can place part of what already matched as a prefix.
-          min = len(bmd.L) - bmd.l[i]
+          min = len(bmd.L) - shift
         } else {
-          shift = bmd.L[i]
+          shift = Li
           min = 0
         }
 
@@ -316,10 +385,10 @@ func BoyerMooreFromReader(bmd BmData, in io.Reader, buf_size int) []int {
           shift = i + 1
           min = 0
         } else {
-          for j := range bc {
-            if bc[j] < i {
-              if i-bc[j] > shift {
-                shift = i - bc[j]
+          for _, bcj := range bc {
+            if bcj < i {
+              if i - shift > bcj {
+                shift = i - bcj
                 min = 0
               }
               break

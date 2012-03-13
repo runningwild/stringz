@@ -36,6 +36,11 @@ func (sf *StringFinder) In(t []byte) []int {
   return core.BoyerMoore(sf.bmd, t)
 }
 
+// Like In(), but searches the data from a Reader instead of a []byte.
+func (sf *StringFinder) InReader(r io.Reader) []int {
+  return core.BoyerMooreFromReader(sf.bmd, r, 100000)
+}
+
 type StringSetFinder struct {
   acd core.AcData
 }
