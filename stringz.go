@@ -67,5 +67,5 @@ func (ssf *StringSetFinder) In(t []byte) [][]int {
 
 // Like In(), but searches the data from a Reader instead of a []byte.
 func (sf *StringSetFinder) InReader(input io.Reader) [][]int {
-  return core.AhoCorasickFromReader(sf.acd, input, 2048)
+  return core.AhoCorasickFromReader(sf.acd, input, 100000)
 }

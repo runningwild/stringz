@@ -96,16 +96,30 @@ func AhoCorasickPreprocess(datas [][]byte) AcData {
 }
 
 func AhoCorasick(acd AcData, t []byte) [][]int {
-  return AhoCorasickFromReader(acd, bytes.NewBuffer(t), 2048)
+  return AhoCorasickFromReader(acd, bytes.NewBuffer(t), 100000)
+}
+
+func keepBuffersFull(in io.Reader, b1, b2 []byte, c chan<- []byte) {
+  buf := b1
+  for n, err := in.Read(buf); err == nil; n, err = in.Read(buf) {
+    c <- buf[0:n]
+    if &buf[0] == &b1[0] {
+      buf = b2
+    } else {
+      buf = b1
+    }
+  }
+  close(c)
 }
 
 func AhoCorasickFromReader(acd AcData, in io.Reader, buf_size int) [][]int {
   cur := 0
   matches := make([][]int, len(acd.Lengths))
-  buf := make([]byte, buf_size)
+  c := make(chan []byte)
+  full_buffer := make([]byte, 2*buf_size)
+  go keepBuffersFull(in, full_buffer[0:buf_size], full_buffer[buf_size:], c)
   read := 0
-  for n, err := in.Read(buf); err == nil; n, err = in.Read(buf) {
-    t := buf[0:n]
+  for t := range c {
     for i, c := range t {
       for _, m := range acd.Nodes[cur].matches {
         matches[m] = append(matches[m], i-acd.Lengths[m]+read)
@@ -120,7 +134,7 @@ func AhoCorasickFromReader(acd AcData, in io.Reader, buf_size int) [][]int {
       }
       cur = acd.Nodes[cur].next[c]
     }
-    read += n
+    read += len(t)
   }
   for _, m := range acd.Nodes[cur].matches {
     matches[m] = append(matches[m], read-acd.Lengths[m])
