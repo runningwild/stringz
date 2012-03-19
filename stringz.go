@@ -13,6 +13,22 @@ import (
   "io"
 )
 
+type SerialStringFinder struct {
+  bmd core.BmData
+  buf []byte
+  res []int
+}
+func SerialFind(p []byte) *SerialStringFinder {
+  return &SerialStringFinder{
+    bmd: core.BoyerMoorePreprocess(p),
+  }
+}
+func (ssf *SerialStringFinder) In(t []byte) []int {
+  ssf.res = ssf.res[0:0]
+  core.BoyerMoore(ssf.bmd, t, &ssf.res)
+  return ssf.res
+}
+
 type StringFinder struct {
   bmd core.BmData
 }
@@ -33,12 +49,16 @@ func Find(p []byte) *StringFinder {
 // respectively.  The search requires O(k) space, where k is the number of
 // times p occurs in t.
 func (sf *StringFinder) In(t []byte) []int {
-  return core.BoyerMoore(sf.bmd, t)
+  var res []int
+  core.BoyerMoore(sf.bmd, t, &res)
+  return res
 }
 
 // Like In(), but searches the data from a Reader instead of a []byte.
 func (sf *StringFinder) InReader(r io.Reader) []int {
-  return core.BoyerMooreFromReader(sf.bmd, r, 100000)
+  var res []int
+  core.BoyerMooreFromReader(sf.bmd, r, make([]byte, 100000), &res)
+  return res
 }
 
 type StringSetFinder struct {

@@ -249,8 +249,7 @@ func BoyerMoorePreprocess(p []byte) BmData {
   return bmd
 }
 
-func BoyerMoore(bmd BmData, t []byte) []int {
-  var matches []int
+func BoyerMoore(bmd BmData, t []byte, res *[]int) {
   k := len(bmd.L) - 1
 
   // In some cases we don't need to go all the way to the left-most character
@@ -268,7 +267,7 @@ func BoyerMoore(bmd BmData, t []byte) []int {
 
     if i < min {
       // found a match
-      matches = append(matches, k-len(bmd.L)+1)
+      *res = append(*res, k-len(bmd.L)+1)
       if bmd.l[0] > 0 {
         k += bmd.l[0]
 
@@ -318,21 +317,22 @@ func BoyerMoore(bmd BmData, t []byte) []int {
       k += shift
     }
   }
-  return matches
 }
 
 // Implementation of the Boyer-Moore string search, as detailed in Gusfield.
 // A detail was left out of Gusfield - in certain shifts we might know that a
 // prefix of the current alignment matches, we need to keep track of that to
 // avoid quadratic runtime.
-func BoyerMooreFromReader(bmd BmData, in io.Reader, buf_size int) []int {
-  var matches []int
+// buf is used for intermediate calculations, to avoid any allocations during
+// this function len(buf) must be at least 2*len(p).
+// res is the slice in which the matches will be stored, if res is nil a new
+// slice will be allocated.
+func BoyerMooreFromReader(bmd BmData, in io.Reader, buf []byte, res *[]int) {
   k := len(bmd.p) - 1
 
-  if buf_size < 2 * len(bmd.p) {
-    buf_size = 2 * len(bmd.p)
+  if len(buf) < 2 * len(bmd.p) {
+    buf = make([]byte, 2*len(bmd.p))
   }
-  buf := make([]byte, buf_size)
 
   // In some cases we don't need to go all the way to the left-most character
   // since we might know that a certain prefix of the current alignment
@@ -353,7 +353,7 @@ func BoyerMooreFromReader(bmd BmData, in io.Reader, buf_size int) []int {
 
       if i < min {
         // found a match
-        matches = append(matches, k-len(bmd.L)+1+read)
+        *res = append(*res, k-len(bmd.L)+1+read)
         l0 := bmd.l[0]
         if l0 > 0 {
           k += l0
@@ -414,5 +414,4 @@ func BoyerMooreFromReader(bmd BmData, in io.Reader, buf_size int) []int {
     copy(buf, t[horizon:])
     mark = len(t[horizon:])
   }
-  return matches
 }

@@ -243,8 +243,10 @@ func BenchmarkBoyerMoore1_10_100000(b *testing.B) {
   t := makeTestString1(100000, 0)
   bmd := core.BoyerMoorePreprocess(p)
   b.StartTimer()
+  var matches []int
   for i := 0; i < b.N; i++ {
-    core.BoyerMoore(bmd, t)
+    matches = matches[0:0]
+    core.BoyerMoore(bmd, t, &matches)
   }
 }
 
@@ -254,8 +256,10 @@ func BenchmarkBoyerMoore1_100_100000(b *testing.B) {
   t := makeTestString1(100000, 0)
   bmd := core.BoyerMoorePreprocess(p)
   b.StartTimer()
+  var matches []int
   for i := 0; i < b.N; i++ {
-    core.BoyerMoore(bmd, t)
+    matches = matches[0:0]
+    core.BoyerMoore(bmd, t, &matches)
   }
 }
 
@@ -268,8 +272,10 @@ func BenchmarkBoyerMoore2_10_100000(b *testing.B) {
   t := makeTestString3(100000, 2)
   bmd := core.BoyerMoorePreprocess(p)
   b.StartTimer()
+  var matches []int
   for i := 0; i < b.N; i++ {
-    core.BoyerMoore(bmd, t)
+    matches = matches[0:0]
+    core.BoyerMoore(bmd, t, &matches)
   }
 }
 
@@ -280,8 +286,10 @@ func BenchmarkBoyerMoore2_100_100000(b *testing.B) {
   t := makeTestString3(100000, 2)
   bmd := core.BoyerMoorePreprocess(p)
   b.StartTimer()
+  var matches []int
   for i := 0; i < b.N; i++ {
-    core.BoyerMoore(bmd, t)
+    matches = matches[0:0]
+    core.BoyerMoore(bmd, t, &matches)
   }
 }
 
@@ -294,8 +302,10 @@ func BenchmarkBoyerMoore3_10_100000(b *testing.B) {
   t := makeTestString1(100000, 1)
   bmd := core.BoyerMoorePreprocess(p)
   b.StartTimer()
+  var matches []int
   for i := 0; i < b.N; i++ {
-    core.BoyerMoore(bmd, t)
+    matches = matches[0:0]
+    core.BoyerMoore(bmd, t, &matches)
   }
 }
 
@@ -305,8 +315,10 @@ func BenchmarkBoyerMoore3_100_100000(b *testing.B) {
   t := makeTestString1(100000, 1)
   bmd := core.BoyerMoorePreprocess(p)
   b.StartTimer()
+  var matches []int
   for i := 0; i < b.N; i++ {
-    core.BoyerMoore(bmd, t)
+    matches = matches[0:0]
+    core.BoyerMoore(bmd, t, &matches)
   }
 }
 
@@ -318,8 +330,10 @@ func BenchmarkBoyerMoore4_10_100000(b *testing.B) {
   t := makeTestString4(100000, 20, 1)
   bmd := core.BoyerMoorePreprocess(p)
   b.StartTimer()
+  var matches []int
   for i := 0; i < b.N; i++ {
-    core.BoyerMoore(bmd, t)
+    matches = matches[0:0]
+    core.BoyerMoore(bmd, t, &matches)
   }
 }
 
@@ -329,8 +343,10 @@ func BenchmarkBoyerMoore4_100_100000(b *testing.B) {
   t := makeTestString4(100000, 20, 1)
   bmd := core.BoyerMoorePreprocess(p)
   b.StartTimer()
+  var matches []int
   for i := 0; i < b.N; i++ {
-    core.BoyerMoore(bmd, t)
+    matches = matches[0:0]
+    core.BoyerMoore(bmd, t, &matches)
   }
 }
 
@@ -342,8 +358,10 @@ func BenchmarkBoyerMoore5_10_100000(b *testing.B) {
   t := makeTestString4(100000, 4, 1)
   bmd := core.BoyerMoorePreprocess(p)
   b.StartTimer()
+  var matches []int
   for i := 0; i < b.N; i++ {
-    core.BoyerMoore(bmd, t)
+    matches = matches[0:0]
+    core.BoyerMoore(bmd, t, &matches)
   }
 }
 
@@ -353,8 +371,46 @@ func BenchmarkBoyerMoore5_100_100000(b *testing.B) {
   t := makeTestString4(100000, 4, 1)
   bmd := core.BoyerMoorePreprocess(p)
   b.StartTimer()
+  var matches []int
   for i := 0; i < b.N; i++ {
-    core.BoyerMoore(bmd, t)
+    matches = matches[0:0]
+    core.BoyerMoore(bmd, t, &matches)
+  }
+}
+
+// BenchmarkBoyerMoore5* tests on random string with an alphabet size of 4,
+// like DNA, using an io.Reader instead of a slice of bytes
+func BenchmarkBoyerMooreReader5_10_100000(b *testing.B) {
+  b.StopTimer()
+  p := makeTestString4(10, 4, 0)
+  t := makeTestString4(1000, 4, 1)
+  bmd := core.BoyerMoorePreprocess(p)
+  b.StartTimer()
+  var matches []int
+  buf := make([]byte, 5000)
+  for i := 0; i < b.N; i++ {
+    matches = matches[0:0]
+    b.StopTimer()
+    in := bytes.NewBuffer(t)
+    b.StartTimer()
+    core.BoyerMooreFromReader(bmd, in, buf, &matches)
+  }
+}
+
+func BenchmarkBoyerMooreReader5_100_100000(b *testing.B) {
+  b.StopTimer()
+  p := makeTestString4(10, 4, 0)
+  t := makeTestString4(10000, 4, 1)
+  bmd := core.BoyerMoorePreprocess(p)
+  b.StartTimer()
+  var matches []int
+  buf := make([]byte, 5000)
+  for i := 0; i < b.N; i++ {
+    matches = matches[0:0]
+    b.StopTimer()
+    in := bytes.NewBuffer(t)
+    b.StartTimer()
+    core.BoyerMooreFromReader(bmd, in, buf, &matches)
   }
 }
 
@@ -384,140 +440,185 @@ func BoyerMooreSpec(c gospec.Context) {
   c.Specify("Basic test", func() {
     p := []byte("a")
     t := []byte("aaaaaaaaaa")
-    c.Expect(core.BoyerMoore(core.BoyerMoorePreprocess(p), t), ContainsExactly, idiotStringSearch(p, t))
+    var matches []int
+    core.BoyerMoore(core.BoyerMoorePreprocess(p), t, &matches)
+    c.Expect(matches, ContainsExactly, idiotStringSearch(p, t))
+    matches = matches[0:0]
     p = []byte("aa")
     t = []byte("aaaaaaaaaa")
-    c.Expect(core.BoyerMoore(core.BoyerMoorePreprocess(p), t), ContainsExactly, idiotStringSearch(p, t))
+    core.BoyerMoore(core.BoyerMoorePreprocess(p), t, &matches)
+    c.Expect(matches, ContainsExactly, idiotStringSearch(p, t))
+    matches = matches[0:0]
     p = []byte("aaaaaaaaaa")
     t = []byte("aaaaaaaaaa")
-    c.Expect(core.BoyerMoore(core.BoyerMoorePreprocess(p), t), ContainsExactly, idiotStringSearch(p, t))
+    core.BoyerMoore(core.BoyerMoorePreprocess(p), t, &matches)
+    c.Expect(matches, ContainsExactly, idiotStringSearch(p, t))
+    matches = matches[0:0]
     p = []byte("aaaaaaaaaaaaaaaaaaaaa")
     t = []byte("aaaaaaaaaa")
-    c.Expect(core.BoyerMoore(core.BoyerMoorePreprocess(p), t), ContainsExactly, idiotStringSearch(p, t))
+    core.BoyerMoore(core.BoyerMoorePreprocess(p), t, &matches)
+    c.Expect(matches, ContainsExactly, idiotStringSearch(p, t))
+    matches = matches[0:0]
     p = []byte("b")
     t = []byte("aaaabaaaaa")
-    c.Expect(core.BoyerMoore(core.BoyerMoorePreprocess(p), t), ContainsExactly, idiotStringSearch(p, t))
+    core.BoyerMoore(core.BoyerMoorePreprocess(p), t, &matches)
+    c.Expect(matches, ContainsExactly, idiotStringSearch(p, t))
+    matches = matches[0:0]
     p = []byte("ba")
     t = []byte("aaaabaaaaa")
-    c.Expect(core.BoyerMoore(core.BoyerMoorePreprocess(p), t), ContainsExactly, idiotStringSearch(p, t))
+    core.BoyerMoore(core.BoyerMoorePreprocess(p), t, &matches)
+    c.Expect(matches, ContainsExactly, idiotStringSearch(p, t))
+    matches = matches[0:0]
     p = []byte("aaaabaaaaa")
     t = []byte("aaaabaaaaa")
-    c.Expect(core.BoyerMoore(core.BoyerMoorePreprocess(p), t), ContainsExactly, idiotStringSearch(p, t))
+    core.BoyerMoore(core.BoyerMoorePreprocess(p), t, &matches)
+    c.Expect(matches, ContainsExactly, idiotStringSearch(p, t))
+    matches = matches[0:0]
     p = []byte("aaaaaaaaaaaaaaaaabaaa")
     t = []byte("aaaaaabaaa")
-    c.Expect(core.BoyerMoore(core.BoyerMoorePreprocess(p), t), ContainsExactly, idiotStringSearch(p, t))
+    core.BoyerMoore(core.BoyerMoorePreprocess(p), t, &matches)
+    c.Expect(matches, ContainsExactly, idiotStringSearch(p, t))
+    matches = matches[0:0]
   })
 
   c.Specify("Comprehensive test 2^17", func() {
     b := make([]byte, 17)
+    var matches []int
     for augment(b, 2) {
       p := b[0:5]
       t := b[5:]
       bmd := core.BoyerMoorePreprocess(p)
-      c.Expect(core.BoyerMoore(bmd, t), ContainsExactly, idiotStringSearch(p, t))
+      matches = matches[0:0]
+      core.BoyerMoore(bmd, t, &matches)
+      c.Expect(matches, ContainsExactly, idiotStringSearch(p, t))
     }
   })
 
   c.Specify("Comprehensive test 3^11", func() {
     b := make([]byte, 11)
+    var matches []int
     for augment(b, 3) {
       p := b[0:4]
       t := b[4:]
       bmd := core.BoyerMoorePreprocess(p)
-      c.Expect(core.BoyerMoore(bmd, t), ContainsExactly, idiotStringSearch(p, t))
+      matches = matches[0:0]
+      core.BoyerMoore(bmd, t, &matches)
+      c.Expect(matches, ContainsExactly, idiotStringSearch(p, t))
     }
   })
 
   c.Specify("Random test", func() {
+    var matches []int
     for i := 0; i < 10000; i += 2 {
       p := makeTestString4(15, 7, i)
       t := makeTestString4(1000, 7, i+1)
       bmd := core.BoyerMoorePreprocess(p)
-      c.Expect(core.BoyerMoore(bmd, t), ContainsExactly, idiotStringSearch(p, t))
+      matches = matches[0:0]
+      core.BoyerMoore(bmd, t, &matches)
+      c.Expect(matches, ContainsExactly, idiotStringSearch(p, t))
     }
   })
 }
 
 func BoyerMooreReaderSpec(c gospec.Context) {
   c.Specify("Basic test", func() {
+    var matches []int
+    buffer := make([]byte, 500)
     p := []byte("a")
     t := []byte("aaaaaaaaa")
     bmd := core.BoyerMoorePreprocess(p)
-    res := core.BoyerMooreFromReader(bmd, bytes.NewBuffer(t), 1)
-    c.Expect(res, ContainsExactly, idiotStringSearch(p, t))
+    matches = matches[0:0]
+    core.BoyerMooreFromReader(bmd, bytes.NewBuffer(t), buffer, &matches)
+    c.Expect(matches, ContainsExactly, idiotStringSearch(p, t))
     p = []byte("aa")
     t = []byte("aaaaaaaaaa")
     core.BoyerMoorePreprocess(p)
     bmd = core.BoyerMoorePreprocess(p)
-    res = core.BoyerMooreFromReader(bmd, bytes.NewBuffer(t), 1)
-    c.Expect(res, ContainsExactly, idiotStringSearch(p, t))
+    matches = matches[0:0]
+    core.BoyerMooreFromReader(bmd, bytes.NewBuffer(t), buffer, &matches)
+    c.Expect(matches, ContainsExactly, idiotStringSearch(p, t))
     p = []byte("aaaaaaaaaa")
     t = []byte("aaaaaaaaaa")
     core.BoyerMoorePreprocess(p)
     bmd = core.BoyerMoorePreprocess(p)
-    res = core.BoyerMooreFromReader(bmd, bytes.NewBuffer(t), 1)
-    c.Expect(res, ContainsExactly, idiotStringSearch(p, t))
+    matches = matches[0:0]
+    core.BoyerMooreFromReader(bmd, bytes.NewBuffer(t), buffer, &matches)
+    c.Expect(matches, ContainsExactly, idiotStringSearch(p, t))
     p = []byte("aaaaaaaaaaaaaaaaaaaaa")
     t = []byte("aaaaaaaaaa")
     core.BoyerMoorePreprocess(p)
     bmd = core.BoyerMoorePreprocess(p)
-    res = core.BoyerMooreFromReader(bmd, bytes.NewBuffer(t), 1)
-    c.Expect(res, ContainsExactly, idiotStringSearch(p, t))
+    matches = matches[0:0]
+    core.BoyerMooreFromReader(bmd, bytes.NewBuffer(t), buffer, &matches)
+    c.Expect(matches, ContainsExactly, idiotStringSearch(p, t))
     p = []byte("b")
     t = []byte("aaaabaaaaa")
     core.BoyerMoorePreprocess(p)
     bmd = core.BoyerMoorePreprocess(p)
-    res = core.BoyerMooreFromReader(bmd, bytes.NewBuffer(t), 1)
-    c.Expect(res, ContainsExactly, idiotStringSearch(p, t))
+    matches = matches[0:0]
+    core.BoyerMooreFromReader(bmd, bytes.NewBuffer(t), buffer, &matches)
+    c.Expect(matches, ContainsExactly, idiotStringSearch(p, t))
     p = []byte("ba")
     t = []byte("aaaabaaaaa")
     core.BoyerMoorePreprocess(p)
     bmd = core.BoyerMoorePreprocess(p)
-    res = core.BoyerMooreFromReader(bmd, bytes.NewBuffer(t), 1)
-    c.Expect(res, ContainsExactly, idiotStringSearch(p, t))
+    matches = matches[0:0]
+    core.BoyerMooreFromReader(bmd, bytes.NewBuffer(t), buffer, &matches)
+    c.Expect(matches, ContainsExactly, idiotStringSearch(p, t))
     p = []byte("aaaabaaaaa")
     t = []byte("aaaabaaaaa")
     core.BoyerMoorePreprocess(p)
     bmd = core.BoyerMoorePreprocess(p)
-    res = core.BoyerMooreFromReader(bmd, bytes.NewBuffer(t), 1)
-    c.Expect(res, ContainsExactly, idiotStringSearch(p, t))
+    matches = matches[0:0]
+    core.BoyerMooreFromReader(bmd, bytes.NewBuffer(t), buffer, &matches)
+    c.Expect(matches, ContainsExactly, idiotStringSearch(p, t))
     p = []byte("aaaaaaaaaaaaaaaaabaaa")
     t = []byte("aaaaaabaaa")
     core.BoyerMoorePreprocess(p)
     bmd = core.BoyerMoorePreprocess(p)
-    res = core.BoyerMooreFromReader(bmd, bytes.NewBuffer(t), 1)
-    c.Expect(res, ContainsExactly, idiotStringSearch(p, t))
+    matches = matches[0:0]
+    core.BoyerMooreFromReader(bmd, bytes.NewBuffer(t), buffer, &matches)
+    c.Expect(matches, ContainsExactly, idiotStringSearch(p, t))
   })
 
   c.Specify("Comprehensive test 2^17", func() {
+    var matches []int
+    buffer := make([]byte, 15)
     b := make([]byte, 17)
     for augment(b, 2) {
       p := b[0:5]
       t := b[5:]
       bmd := core.BoyerMoorePreprocess(p)
-      res := core.BoyerMooreFromReader(bmd, bytes.NewBuffer(t), 1)
-      c.Expect(res, ContainsExactly, idiotStringSearch(p, t))
+      matches = matches[0:0]
+      core.BoyerMooreFromReader(bmd, bytes.NewBuffer(t), buffer, &matches)
+      c.Expect(matches, ContainsExactly, idiotStringSearch(p, t))
     }
   })
 
   c.Specify("Comprehensive test 3^11", func() {
+    var matches []int
+    buffer := make([]byte, 15)
     b := make([]byte, 11)
     for augment(b, 3) {
       p := b[0:4]
       t := b[4:]
       bmd := core.BoyerMoorePreprocess(p)
-      res := core.BoyerMooreFromReader(bmd, bytes.NewBuffer(t), 1)
-      c.Expect(res, ContainsExactly, idiotStringSearch(p, t))
+      matches = matches[0:0]
+      core.BoyerMooreFromReader(bmd, bytes.NewBuffer(t), buffer, &matches)
+      c.Expect(matches, ContainsExactly, idiotStringSearch(p, t))
     }
   })
 
   c.Specify("Random test", func() {
+    var matches []int
+    buffer := make([]byte, 15)
     for i := 0; i < 10000; i += 2 {
       p := makeTestString4(15, 7, i)
       t := makeTestString4(1000, 7, i+1)
       bmd := core.BoyerMoorePreprocess(p)
-      res := core.BoyerMooreFromReader(bmd, bytes.NewBuffer(t), 1)
-      c.Expect(res, ContainsExactly, idiotStringSearch(p, t))
+      matches = matches[0:0]
+      core.BoyerMooreFromReader(bmd, bytes.NewBuffer(t), buffer, &matches)
+      c.Expect(matches, ContainsExactly, idiotStringSearch(p, t))
     }
   })
 }
