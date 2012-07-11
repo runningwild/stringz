@@ -13,22 +13,23 @@ import (
   "io"
 )
 
-type SerialStringFinder struct {
-  bmd core.BmData
-  buf []byte
-  res []int
-}
+// This was just an experiment, probably shouldn't publish it yet
+// type SerialStringFinder struct {
+//   bmd core.BmData
+//   buf []byte
+//   res []int
+// }
 
-func SerialFind(p []byte) *SerialStringFinder {
-  return &SerialStringFinder{
-    bmd: core.BoyerMoorePreprocess(p),
-  }
-}
-func (ssf *SerialStringFinder) In(t []byte) []int {
-  ssf.res = ssf.res[0:0]
-  core.BoyerMoore(ssf.bmd, t, &ssf.res)
-  return ssf.res
-}
+// func SerialFind(p []byte) *SerialStringFinder {
+//   return &SerialStringFinder{
+//     bmd: core.BoyerMoorePreprocess(p),
+//   }
+// }
+// func (ssf *SerialStringFinder) In(t []byte) []int {
+//   ssf.res = ssf.res[0:0]
+//   core.BoyerMoore(ssf.bmd, t, &ssf.res)
+//   return ssf.res
+// }
 
 type StringFinder struct {
   bmd core.BmData
