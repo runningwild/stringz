@@ -8,10 +8,10 @@ import (
   "testing"
 )
 
-func idiotAhoCorasick(ps [][]byte, t []byte) [][]int {
-  var res [][]int
+func idiotAhoCorasick(ps [][]byte, t []byte) map[int][]int {
+  res := make(map[int][]int)
   for i := range ps {
-    res = append(res, idiotStringSearch(ps[i], t))
+    res[i] = idiotStringSearch(ps[i], t)
   }
   return res
 }

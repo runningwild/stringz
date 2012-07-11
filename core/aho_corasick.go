@@ -95,7 +95,7 @@ func AhoCorasickPreprocess(datas [][]byte) AcData {
   return acd
 }
 
-func AhoCorasick(acd AcData, t []byte) [][]int {
+func AhoCorasick(acd AcData, t []byte) map[int][]int {
   return AhoCorasickFromReader(acd, bytes.NewBuffer(t), 100000)
 }
 
@@ -112,9 +112,9 @@ func keepBuffersFull(in io.Reader, b1, b2 []byte, c chan<- []byte) {
   close(c)
 }
 
-func AhoCorasickFromReader(acd AcData, in io.Reader, buf_size int) [][]int {
+func AhoCorasickFromReader(acd AcData, in io.Reader, buf_size int) map[int][]int {
   cur := 0
-  matches := make([][]int, len(acd.Lengths))
+  matches := make(map[int][]int, len(acd.Lengths))
   c := make(chan []byte)
   full_buffer := make([]byte, 2*buf_size)
   go keepBuffersFull(in, full_buffer[0:buf_size], full_buffer[buf_size:], c)

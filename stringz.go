@@ -18,6 +18,7 @@ type SerialStringFinder struct {
   buf []byte
   res []int
 }
+
 func SerialFind(p []byte) *SerialStringFinder {
   return &SerialStringFinder{
     bmd: core.BoyerMoorePreprocess(p),
@@ -81,11 +82,11 @@ func FindSet(ps [][]byte) *StringSetFinder {
 // in ascending order.  The search takes O(m) time and O(k) space, where m is
 // the length of t, and k is the total number of occurrences of all elements
 // of ps in t.
-func (ssf *StringSetFinder) In(t []byte) [][]int {
+func (ssf *StringSetFinder) In(t []byte) map[int][]int {
   return core.AhoCorasick(ssf.acd, t)
 }
 
 // Like In(), but searches the data from a Reader instead of a []byte.
-func (sf *StringSetFinder) InReader(input io.Reader) [][]int {
+func (sf *StringSetFinder) InReader(input io.Reader) map[int][]int {
   return core.AhoCorasickFromReader(sf.acd, input, 100000)
 }

@@ -383,7 +383,7 @@ func BenchmarkBoyerMoore5_100_100000(b *testing.B) {
 func BenchmarkBoyerMooreReader5_10_100000(b *testing.B) {
   b.StopTimer()
   p := makeTestString4(10, 4, 0)
-  t := makeTestString4(1000, 4, 1)
+  t := makeTestString4(100000, 4, 1)
   bmd := core.BoyerMoorePreprocess(p)
   b.StartTimer()
   var matches []int
@@ -399,8 +399,8 @@ func BenchmarkBoyerMooreReader5_10_100000(b *testing.B) {
 
 func BenchmarkBoyerMooreReader5_100_100000(b *testing.B) {
   b.StopTimer()
-  p := makeTestString4(10, 4, 0)
-  t := makeTestString4(10000, 4, 1)
+  p := makeTestString4(100, 4, 0)
+  t := makeTestString4(100000, 4, 1)
   bmd := core.BoyerMoorePreprocess(p)
   b.StartTimer()
   var matches []int

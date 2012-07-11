@@ -42,8 +42,24 @@ func ExampleStringSetFinder() {
   find := stringz.FindSet(ps)
   hits1 := find.In(t1)
   hits2 := find.In(t2)
-  fmt.Printf("%v\n%v\n", hits1, hits2)
+  fmt.Printf("Hits1:\n")
+  for i := 0; i < len(hits1); i++ {
+    fmt.Printf("\"%s\": %v\n", ps[i], hits1[i])
+  }
+  fmt.Printf("\nHits2:\n")
+  for i := 0; i < len(hits2); i++ {
+    fmt.Printf("\"%s\": %v\n", ps[i], hits2[i])
+  }
   // Output:
-  // [[4 18] [0] [8] [13]]
-  // [[7 21] [25] [16] [11]]
+  // Hits1:
+  // "foo": [4 18]
+  // "bar": [0]
+  // "wing": [8]
+  // "ding": [13]
+
+  // Hits2:
+  // "foo": [7 21]
+  // "bar": [25]
+  // "wing": [16]
+  // "ding": [11]
 }
